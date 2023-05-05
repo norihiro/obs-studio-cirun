@@ -1,0 +1,87 @@
+name: 'OBS Studio CI run'
+
+on:
+  push:
+    branches: ['*']
+  schedule:
+  - cron: 12 4 * * *
+  workflow_dispatch:
+
+jobs:
+  linux_run:
+    runs-on: 'ubuntu-22.04'
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: 'Checkout run-script'
+        uses: actions/checkout@v3
+
+      - name: 'Checkout obs-studio'
+        uses: actions/checkout@v3
+        with:
+          repository: 'obsproject/obs-studio'
+          path: 'obs-studio'
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: 'Setup build environment'
+        id: setup
+        run: |
+          echo "obsHash=$(cd obs-studio && git rev-parse --short=9 HEAD)" >> $GITHUB_OUTPUT
+
+      - name: 'Restore ccache'
+        id: ccache-cache
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: cirun-ccache
+
+      - name: 'Restore obs-studio build directory'
+        id: obs-studio-build-cache
+        uses: actions/cache/restore@v3
+        with:
+          path: obs-studio/build
+          key: obs-studio-build-${{ steps.setup.outputs.obsHash }}
+
+      - name: 'Configure and build obs-studio'
+        run: |
+          set -ex
+          script/workflow2env.py -w obs-studio/.github/workflows/main.yml -j linux_build -e CEF_BUILD_VERSION_LINUX > build.env
+          . build.env
+          cd obs-studio
+          export RESTORED_CEF=''
+          bash -x CI/build-linux.sh
+
+      - name: 'Save ccache'
+        uses: actions/cache/save@v3
+        if: ${{ steps.ccache-cache.outputs.cache-hit != 'true' }}
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: cirun-ccache
+
+      - name: 'Save obs-studio build directory'
+        uses: actions/cache/save@v3
+        if: ${{ steps.obs-studio-build-cache.outputs.cache-hit != 'true' }}
+        with:
+          path: ${{ github.workspace }}/obs-studio/build
+          key: obs-studio-build-${{ steps.setup.outputs.obsHash }}
+
+      - name: 'Install obs-studio and test suites'
+        run: |
+          set -e
+          apt_packages=(
+            xvfb
+            python3-pip
+            scrot
+            tesseract-ocr tesseract-ocr-eng
+          )
+          pip3_packages=(
+            pyautogui
+            editdistance
+            tesseract
+          )
+          sudo apt install -y "${apt_packages[@]}"
+          (cd obs-studio && sudo cmake --install build)
+          pip3 install -U "${pip3_packages[@]}"
