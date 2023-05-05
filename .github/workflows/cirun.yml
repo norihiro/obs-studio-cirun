@@ -51,6 +51,7 @@ jobs:
           script/workflow2env.py -w obs-studio/.github/workflows/main.yml -j linux_build -e CEF_BUILD_VERSION_LINUX > build.env
           . build.env
           cd obs-studio
+          patch -p1 < ../patch/cmake-coverage.patch
           export RESTORED_CEF=''
           bash -x CI/build-linux.sh
 
@@ -82,6 +83,7 @@ jobs:
             python3-tk python3-dev
             python3-tesserocr
             scrot
+            lcov
           )
           pip3_packages=(
             pyautogui
@@ -103,6 +105,26 @@ jobs:
         run: |
           mkdir screenshot
           timeout 3m xvfb-run cirun/obs-firsttime.py
+
+      - name: 'Gather coverage data'
+        if: always()
+        run: |
+          set -e
+          cd obs-studio
+          lcov \
+            --exclude '/usr/*' \
+            --exclude '*_autogen/*' \
+            --exclude '${{ github.workspace }}/obs-build-dependencies/*' \
+            --exclude 'deps/*' \
+            --exclude 'build/deps/*' \
+            --exclude 'plugins/decklink/linux/decklink-sdk/*' \
+            --exclude 'plugins/obs-browser/deps/*' \
+            -c -d . -o lcov.info
+          genhtml lcov.info -o ../coverage/
+
+      - name: 'Gather log files'
+        if: always()
+        run: |
           mv $HOME/.config/obs-studio/logs .
 
       - name: 'Upload results'
@@ -113,3 +135,4 @@ jobs:
           path: |
             screenshot/
             logs/
+            coverage/

@@ -1,0 +1,21 @@
+diff --git a/cmake/Modules/CompilerConfig.cmake b/cmake/Modules/CompilerConfig.cmake
+index 41c56da8b..3784cd03b 100644
+--- a/cmake/Modules/CompilerConfig.cmake
++++ b/cmake/Modules/CompilerConfig.cmake
+@@ -101,6 +101,7 @@ else()
+ 
+   option(CALM_DEPRECATION "Keep deprecated-declarations as warnings" OFF)
+   add_compile_options(
++    -coverage
+     -Werror
+     -Wextra
+     -Wvla
+@@ -136,6 +137,8 @@ else()
+     add_link_options("LINKER:$<$<PLATFORM_ID:Darwin>:-adhoc_codesign>")
+   endif()
+ 
++  add_link_options("-coverage")
++
+   if(MINGW)
+     set(CMAKE_WIDL
+         "widl"
