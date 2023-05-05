@@ -71,17 +71,45 @@ jobs:
       - name: 'Install obs-studio and test suites'
         run: |
           set -e
+
+          (cd obs-studio && sudo cmake --install build)
+
           apt_packages=(
+            apt-transport-https gnupg
             xvfb
             python3-pip
+            python3-pil
+            python3-tk python3-dev
+            python3-tesserocr
             scrot
-            tesseract-ocr tesseract-ocr-eng
           )
           pip3_packages=(
             pyautogui
             editdistance
-            tesseract
+            pytesseract
           )
           sudo apt install -y "${apt_packages[@]}"
-          (cd obs-studio && sudo cmake --install build)
           pip3 install -U "${pip3_packages[@]}"
+
+          curl -L https://notesalexp.org/debian/alexp_key.asc | sudo apt-key add -
+          sudo tee -a /etc/apt/sources.list <<<"deb https://notesalexp.org/tesseract-ocr5/jammy/ jammy main"
+          sudo apt update
+          sudo apt install -y tesseract-ocr tesseract-ocr-eng
+
+          git clone https://github.com/norihiro/untriseptium.git
+          (cd untriseptium && pip3 install -U ./)
+
+      - name: 'Run first time'
+        run: |
+          mkdir screenshot
+          timeout 3m xvfb-run cirun/obs-firsttime.py
+          mv $HOME/.config/obs-studio/logs .
+
+      - name: 'Upload results'
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'obs-studio-cirun-${{ steps.setup.outputs.obsHash }}'
+          path: |
+            screenshot/
+            logs/
