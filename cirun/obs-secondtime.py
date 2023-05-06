@@ -14,32 +14,6 @@ u = Untriseptium()
 screen_size = pyautogui.size()
 
 
-def workaround_crop_manual(u, x=None, y=None):
-    if not u.screenshot:
-        u.capture()
-    if not x:
-        x = screen_size.width
-    if not y:
-        y = screen_size.height
-    u.screenshot = u.screenshot.crop((0, 0, x, y))
-    u.ocr()
-
-
-def workaround_current_window(u):
-    s = subprocess.run(['xdotool', 'getwindowfocus', 'getwindowgeometry'], capture_output=True)
-    for line in s.stdout.decode().split('\n'):
-        line = line.strip().split(' ')
-        if len(line) >= 2 and line[0] == 'Position:':
-            x0, y0 = line[1].split(',')
-        elif len(line) >= 2 and line[0] == 'Geometry:':
-            x1, y1 = line[1].split('x')
-    x0 = int(x0)
-    y0 = int(y0)
-    y1 = int(y1)
-    x1 = int(x1)
-    workaround_crop_manual(u, x0+x1, y0+y1)
-
-
 def get_obsws_password():
     config = configparser.ConfigParser()
     home = os.environ['HOME']
@@ -54,16 +28,15 @@ sleep(5)
 # Configure obs-websocket
 ## Open obs-websocket dialog
 u.capture()
-workaround_crop_manual(u, y=50)
 u.find_text('Tools').click()
+sleep(1)
 u.capture()
-workaround_current_window(u)
-workaround_crop_manual(u, y=250)
 u.find_text('WebSocket Server Settings').click()
+sleep(1)
 
 ## Enable obs-websocket
-workaround_current_window(u)
 u.find_text('Enable WebSocket server').click()
+sleep(1)
 
 u.capture()
 u.screenshot.save('screenshot/secondtime-01-obswebsocket.png')
@@ -79,23 +52,16 @@ for i in range(0, 3):
 # Configure settings
 ## Open
 u.capture()
-workaround_crop_manual(u, y=100)
-u.find_text('File').click()
-sleep(1)
-u.capture()
-workaround_crop_manual(u, x=300, y=400)
-u.find_text('Settings').click()
-sleep(1)
+u.find_text('Settings', location_hint=(0.9, 0.9, 0.3)).click() # located at bottom right
+sleep(2)
 
 ## Open Advanced
 u.capture()
-workaround_crop_manual(u, x=300, y=500)
 u.find_text('Advanced').click()
 sleep(1)
 
 ## Enable autoremux
 u.capture()
-workaround_current_window(u)
 u.find_text('Automatically remux to mp4').click()
 sleep(1)
 u.capture()
