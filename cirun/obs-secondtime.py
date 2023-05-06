@@ -2,6 +2,7 @@
 
 import configparser
 import os
+import subprocess
 import pyautogui
 from untriseptium import Untriseptium
 from time import sleep
@@ -25,7 +26,6 @@ def workaround_crop_manual(u, x=None, y=None):
 
 
 def workaround_current_window(u):
-    import subprocess
     s = subprocess.run(['xdotool', 'getwindowfocus', 'getwindowgeometry'], capture_output=True)
     for line in s.stdout.decode().split('\n'):
         line = line.strip().split(' ')
@@ -48,7 +48,7 @@ def get_obsws_password():
 
 
 # Start OBS Studio
-os.system('obs &>/dev/null &')
+proc_obs = subprocess.Popen(['obs'])
 sleep(5)
 
 # Configure obs-websocket
@@ -134,3 +134,5 @@ cl.send('StopRecord')
 pyautogui.click(screen_size.width/2, screen_size.height/2)
 pyautogui.hotkey('ctrl', 'q')
 sleep(2)
+proc_obs.send_signal(subprocess.signal.SIGINT)
+proc_obs.communicate()
