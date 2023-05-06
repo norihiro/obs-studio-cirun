@@ -57,7 +57,7 @@ jobs:
 
       - name: 'Save ccache'
         uses: actions/cache/save@v3
-        if: ${{ steps.ccache-cache.outputs.cache-hit != 'true' }}
+        if: always()
         with:
           path: ${{ github.workspace }}/.ccache
           key: cirun-ccache
