@@ -127,6 +127,21 @@ jobs:
         run: |
           mv $HOME/.config/obs-studio/logs .
 
+      - name: 'Upload log files'
+        if: always()
+        env:
+          CIRUN_DEPLOY_SSHKEY: ${{ secrets.CIRUN_DEPLOY_SSHKEY }}
+          CIRUN_DEPLOY_HOSTKEY: ${{ secrets.CIRUN_DEPLOY_HOSTKEY }}
+          CIRUN_DEPLOY_TARGET: ${{ secrets.CIRUN_DEPLOY_TARGET }}
+        run: |
+          set +x
+          mkdir -m 700 -p ~/.ssh
+          echo "${CIRUN_DEPLOY_SSHKEY}" | base64 -d > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          rsync -av logs screenshot coverage "${CIRUN_DEPLOY_TARGET}"
+
       - name: 'Upload results'
         if: always()
         uses: actions/upload-artifact@v3
