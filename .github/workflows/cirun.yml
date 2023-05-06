@@ -18,6 +18,14 @@ jobs:
       - name: 'Checkout run-script'
         uses: actions/checkout@v3
 
+      - name: 'Restore obs-studio directory'
+        id: obs-studio-cache
+        if: github.event_name != 'schedule'
+        uses: actions/cache/restore@v3
+        with:
+          path: obs-studio
+          key: obs-studio
+
       - name: 'Checkout obs-studio'
         uses: actions/checkout@v3
         with:
@@ -25,10 +33,12 @@ jobs:
           path: 'obs-studio'
           submodules: 'recursive'
           fetch-depth: 0
+          clean: false
 
       - name: 'Setup build environment'
         id: setup
         run: |
+          (cd obs-studio && git pull && git submodule update --recursive)
           echo "obsHash=$(cd obs-studio && git rev-parse --short=9 HEAD)" >> $GITHUB_OUTPUT
 
       - name: 'Restore ccache'
@@ -37,13 +47,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/.ccache
           key: cirun-ccache
-
-      - name: 'Restore obs-studio build directory'
-        id: obs-studio-build-cache
-        uses: actions/cache/restore@v3
-        with:
-          path: obs-studio/build
-          key: obs-studio-build-${{ steps.setup.outputs.obsHash }}
 
       - name: 'Configure and build obs-studio'
         run: |
@@ -64,10 +67,10 @@ jobs:
 
       - name: 'Save obs-studio build directory'
         uses: actions/cache/save@v3
-        if: ${{ steps.obs-studio-build-cache.outputs.cache-hit != 'true' }}
+        if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         with:
-          path: ${{ github.workspace }}/obs-studio/build
-          key: obs-studio-build-${{ steps.setup.outputs.obsHash }}
+          path: obs-studio
+          key: obs-studio
 
       - name: 'Install obs-studio and test suites'
         run: |
