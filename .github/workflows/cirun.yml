@@ -107,6 +107,7 @@ jobs:
             python3-tk python3-dev
             python3-tesserocr
             scrot
+            xdotool
             lcov
           )
           sudo apt install -y "${apt_packages[@]}"
@@ -124,6 +125,11 @@ jobs:
         run: |
           mkdir screenshot
           timeout 3m xvfb-run cirun/obs-firsttime.py
+
+      - name: 'Run second time'
+        run: |
+          mkdir -p screenshot
+          timeout 10m xvfb-run cirun/obs-secondtime.py
 
       - name: 'Gather coverage data'
         if: always()
