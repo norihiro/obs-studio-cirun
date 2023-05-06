@@ -140,10 +140,12 @@ jobs:
             --exclude '/usr/*' \
             --exclude '*_autogen/*' \
             --exclude '${{ github.workspace }}/obs-build-dependencies/*' \
-            --exclude 'deps/*' \
-            --exclude 'build/deps/*' \
-            --exclude 'plugins/decklink/linux/decklink-sdk/*' \
-            --exclude 'plugins/obs-browser/deps/*' \
+            --exclude '*/deps/*' \
+            --exclude '*/ftl-sdk/*' \
+            --exclude '*/decklink-sdk/*' \
+            --exclude '*/libnsgif/*' \
+            --exclude '*/obs-outputs/librtmp/*' \
+            --exclude '*/rnnoise/src/*' \
             -c -d . -o lcov.info
           genhtml lcov.info -o ../coverage/
 
