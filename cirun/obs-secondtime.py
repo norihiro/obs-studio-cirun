@@ -74,7 +74,6 @@ u.screenshot.save('screenshot/secondtime-01-obswebsocket-end.png')
 
 # Start obs-websocket client
 cl = obsws.ReqClient(host='localhost', port=4455, password=get_obsws_password())
-print(cl.get_version())
 
 # Set Studio Mode
 cl.set_studio_mode_enabled(True)
@@ -82,7 +81,56 @@ sleep(1)
 u.capture()
 u.screenshot.save('screenshot/secondtime-02-studiomode.png')
 
+# Create various scources
+scenes = set()
+for scene in cl.send('GetSceneList').scenes:
+    scenes.add(scene['sceneName'])
+
+sources = [
+        {
+            'inputName': 'background',
+            'sceneName': 'Background Scene',
+            'inputKind': 'color_source_v3',
+            'inputSettings': {
+                'color': 0xff582416,
+                },
+            },
+        {
+            'inputName': 'text',
+            'sceneName': 'Scene Text',
+            'inputKind': 'text_ft2_source_v2',
+            'inputSettings': {
+                'text': 'Text Source',
+                },
+            },
+        ]
+
+background_source = sources[0]['sceneName']
+
+for source in sources:
+    sceneName = source['sceneName']
+    if not sceneName in scenes:
+        cl.send('CreateScene', {'sceneName': sceneName})
+        scenes.add(sceneName)
+    if sceneName != background_source:
+        cl.send('CreateSceneItem', {'sceneName': sceneName, 'sourceName': background_source})
+    cl.send('CreateInput', source)
+    cl.send('SetCurrentPreviewScene', {'sceneName': sceneName})
+    cl.send('TriggerStudioModeTransition')
+    if sceneName == background_source:
+        cl.send('StartRecord')
+    sleep(2)
+
+flg_cleanup = False
+if flg_cleanup:
+    for source in sources:
+        sceneName = source['sceneName']
+        if sceneName in scenes:
+            cl.send('RemoveScene', {'sceneName': sceneName})
+            scenes.remove(sceneName)
+
 # Exit OBS
+cl.send('StopRecord')
 pyautogui.click(screen_size.width/2, screen_size.height/2)
 pyautogui.hotkey('ctrl', 'q')
 sleep(2)
