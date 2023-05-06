@@ -155,6 +155,7 @@ jobs:
           mv $HOME/.config/obs-studio/logs .
           mkdir -p recording
           mv $HOME/*.mp4 recording/ || true
+          cp -a $HOME/.config/obs-studio config-obs-studio
 
       - name: 'Upload log files'
         if: always()
@@ -169,7 +170,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-          rsync -av logs screenshot coverage recording "${CIRUN_DEPLOY_TARGET}"
+          rsync -av logs config-obs-studio coverage screenshot recording "${CIRUN_DEPLOY_TARGET}"
 
       - name: 'Upload results'
         if: always()
