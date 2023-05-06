@@ -18,6 +18,12 @@ jobs:
       - name: 'Checkout run-script'
         uses: actions/checkout@v3
 
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
       - name: 'Restore obs-studio directory'
         id: obs-studio-cache
         if: github.event_name != 'schedule'
@@ -103,13 +109,8 @@ jobs:
             scrot
             lcov
           )
-          pip3_packages=(
-            pyautogui
-            editdistance
-            pytesseract
-          )
           sudo apt install -y "${apt_packages[@]}"
-          pip3 install -U "${pip3_packages[@]}"
+          pip3 install -U -r cirun/requirements.txt
 
           curl -L https://notesalexp.org/debian/alexp_key.asc | sudo apt-key add -
           sudo tee -a /etc/apt/sources.list <<<"deb https://notesalexp.org/tesseract-ocr5/jammy/ jammy main"
