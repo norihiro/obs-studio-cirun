@@ -152,7 +152,7 @@ jobs:
         run: |
           mv $HOME/.config/obs-studio/logs .
           mkdir -p recording
-          mv $HOME/*.mkv recording/ || true
+          mv $HOME/*.mp4 recording/ || true
 
       - name: 'Upload log files'
         if: always()

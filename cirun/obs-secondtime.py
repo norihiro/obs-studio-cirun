@@ -71,6 +71,41 @@ pyautogui.hotkey('enter')
 sleep(1)
 u.capture()
 u.screenshot.save('screenshot/secondtime-01-obswebsocket-end.png')
+## Ensure to close dialog
+for i in range(0, 3):
+    sleep(1)
+    pyautogui.hotkey('esc')
+
+# Configure settings
+## Open
+u.capture()
+workaround_crop_manual(u, y=100)
+u.find_text('File').click()
+sleep(1)
+u.capture()
+workaround_crop_manual(u, x=300, y=400)
+u.find_text('Settings').click()
+sleep(1)
+
+## Open Advanced
+u.capture()
+workaround_crop_manual(u, x=300, y=500)
+u.find_text('Advanced').click()
+sleep(1)
+
+## Enable autoremux
+u.capture()
+workaround_current_window(u)
+u.find_text('Automatically remux to mp4').click()
+sleep(1)
+u.capture()
+u.screenshot.save('screenshot/secondtime-02-settings-advanced.png')
+pyautogui.hotkey('enter')
+
+## Ensure to close dialog
+for i in range(0, 3):
+    sleep(1)
+    pyautogui.hotkey('esc')
 
 # Start obs-websocket client
 cl = obsws.ReqClient(host='localhost', port=4455, password=get_obsws_password())
@@ -131,6 +166,7 @@ if flg_cleanup:
 
 # Exit OBS
 cl.send('StopRecord')
+sleep(1)
 pyautogui.click(screen_size.width/2, screen_size.height/2)
 pyautogui.hotkey('ctrl', 'q')
 sleep(2)
