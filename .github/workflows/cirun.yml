@@ -26,6 +26,14 @@ jobs:
           path: obs-studio
           key: obs-studio
 
+      - name: 'Restore obs-build-dependencies directory'
+        id: obs-build-dependencies-cache
+        if: github.event_name != 'schedule'
+        uses: actions/cache/restore@v3
+        with:
+          path: obs-build-dependencies
+          key: obs-build-dependencies
+
       - name: 'Checkout obs-studio'
         uses: actions/checkout@v3
         with:
@@ -71,6 +79,13 @@ jobs:
         with:
           path: obs-studio
           key: obs-studio
+
+      - name: 'Restore obs-build-dependencies directory'
+        uses: actions/cache/save@v3
+        if: ${{ steps.obs-build-dependencies-cache.outputs.cache-hit != 'true' }}
+        with:
+          path: obs-build-dependencies
+          key: obs-build-dependencies
 
       - name: 'Install obs-studio and test suites'
         run: |
