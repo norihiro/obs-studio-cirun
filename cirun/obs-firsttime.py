@@ -5,6 +5,7 @@ import pyautogui
 from untriseptium import Untriseptium
 from time import sleep
 
+sleep(1)
 u = Untriseptium()
 screen_size = pyautogui.size()
 
