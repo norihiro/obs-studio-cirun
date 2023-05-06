@@ -102,6 +102,7 @@ jobs:
           apt_packages=(
             apt-transport-https gnupg
             xvfb
+            ffmpeg
             python3-pip
             python3-pil
             python3-tk python3-dev
@@ -155,6 +156,7 @@ jobs:
           mv $HOME/.config/obs-studio/logs .
           mkdir -p recording
           mv $HOME/*.mp4 recording/ || true
+          mv desktop*.mkv recording/ || true
           cp -a $HOME/.config/obs-studio config-obs-studio
 
       - name: 'Upload log files'

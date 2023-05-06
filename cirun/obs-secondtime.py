@@ -9,8 +9,12 @@ from time import sleep
 import obsws_python as obsws
 
 
+flg_x11grab = True
+
+
 sleep(1)
 u = Untriseptium()
+u.ocrengine.ocr_split_height = 32
 screen_size = pyautogui.size()
 
 
@@ -20,6 +24,21 @@ def get_obsws_password():
     config.read(home + '/.config/obs-studio/global.ini')
     return config['OBSWebSocket']['ServerPassword']
 
+def click_verbose(t):
+    print(f'Clicking text={t.text} location={t.location} confidence={t.confidence}')
+    t.click()
+    sleep(0.2)
+
+if flg_x11grab:
+    proc_ffmpeg = subprocess.Popen([
+        'ffmpeg',
+        '-loglevel', 'error',
+        '-video_size', f'{screen_size.width}x{screen_size.height}',
+        '-framerate', '5',
+        '-f', 'x11grab',
+        '-i', os.environ['DISPLAY'],
+        '-y', 'desktop-secondtime.mkv'
+        ], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 # Start OBS Studio
 proc_obs = subprocess.Popen(['obs'])
@@ -29,16 +48,14 @@ sleep(5)
 ## Open obs-websocket dialog
 print('Opening Tools -> WebSocket Server Settings...')
 u.capture()
-u.find_text('Tools').click()
-sleep(1)
+u.screenshot.save('screenshot/secondtime-01-init.png')
+click_verbose(u.find_text('Tools', location_hint=(0.5, 0.0, 0.3)))
 u.capture()
 u.screenshot.save('screenshot/secondtime-01-menu-tools.png')
-u.find_text('WebSocket Server Settings').click()
-sleep(1)
+click_verbose(u.find_text('WebSocket Server Settings'))
 
 ## Enable obs-websocket
-u.find_text('Enable WebSocket server').click()
-sleep(1)
+click_verbose(u.find_text('Enable WebSocket server'))
 
 u.capture()
 u.screenshot.save('screenshot/secondtime-01-obswebsocket.png')
@@ -55,19 +72,17 @@ for i in range(0, 3):
 ## Open
 print('Opening Settings dialog')
 u.capture()
-u.find_text('Settings', location_hint=(0.9, 0.9, 0.3)).click() # located at bottom right
+click_verbose(u.find_text('Settings', location_hint=(0.9, 0.9, 0.3))) # located at bottom right
 sleep(2)
 
 ## Open Advanced
 print('Opening Advanced tab')
 u.capture()
-u.find_text('Advanced').click()
-sleep(1)
+click_verbose(u.find_text('Advanced'))
 
 ## Enable autoremux
 u.capture()
-u.find_text('Automatically remux to mp4').click()
-sleep(1)
+click_verbose(u.find_text('Automatically remux to mp4'))
 u.capture()
 u.screenshot.save('screenshot/secondtime-02-settings-advanced.png')
 pyautogui.hotkey('enter')
@@ -142,3 +157,11 @@ pyautogui.hotkey('ctrl', 'q')
 sleep(2)
 proc_obs.send_signal(subprocess.signal.SIGINT)
 proc_obs.communicate()
+
+if flg_x11grab:
+    proc_ffmpeg.stdin.write('q'.encode())
+    proc_ffmpeg.stdin.flush()
+    proc_ffmpeg.stdin.close()
+    proc_ffmpeg.communicate()
+
+sleep(1)

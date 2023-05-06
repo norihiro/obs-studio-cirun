@@ -1,13 +1,27 @@
 #! /usr/bin/env python3
 
 import os
+import subprocess
 import pyautogui
 from untriseptium import Untriseptium
 from time import sleep
 
+flg_x11grab = True
+
 sleep(1)
 u = Untriseptium()
 screen_size = pyautogui.size()
+
+if flg_x11grab:
+    proc_ffmpeg = subprocess.Popen([
+        'ffmpeg',
+        '-loglevel', 'error',
+        '-video_size', f'{screen_size.width}x{screen_size.height}',
+        '-framerate', '5',
+        '-f', 'x11grab',
+        '-i', os.environ['DISPLAY'],
+        '-y', 'desktop-firsttime.mkv'
+        ], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 # Start OBS Studio
 os.system('rm -rf $HOME/.config/obs-studio')
@@ -41,4 +55,12 @@ pyautogui.click(screen_size.width/2, screen_size.height/2)
 u.capture()
 u.screenshot.save('screenshot/firsttime-5.png')
 pyautogui.hotkey('ctrl', 'q')
+sleep(1)
+
+if flg_x11grab:
+    proc_ffmpeg.stdin.write('q'.encode())
+    proc_ffmpeg.stdin.flush()
+    proc_ffmpeg.stdin.close()
+    proc_ffmpeg.communicate()
+
 sleep(1)
