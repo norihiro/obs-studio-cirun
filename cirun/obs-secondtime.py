@@ -27,10 +27,12 @@ sleep(5)
 
 # Configure obs-websocket
 ## Open obs-websocket dialog
+print('Opening Tools -> WebSocket Server Settings...')
 u.capture()
 u.find_text('Tools').click()
 sleep(1)
 u.capture()
+u.screenshot.save('screenshot/secondtime-01-menu-tools.png')
 u.find_text('WebSocket Server Settings').click()
 sleep(1)
 
@@ -51,11 +53,13 @@ for i in range(0, 3):
 
 # Configure settings
 ## Open
+print('Opening Settings dialog')
 u.capture()
 u.find_text('Settings', location_hint=(0.9, 0.9, 0.3)).click() # located at bottom right
 sleep(2)
 
 ## Open Advanced
+print('Opening Advanced tab')
 u.capture()
 u.find_text('Advanced').click()
 sleep(1)
