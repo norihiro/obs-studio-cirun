@@ -71,8 +71,9 @@ for i in range(0, 3):
 # Configure settings
 ## Open
 print('Opening Settings dialog')
-u.capture()
-click_verbose(u.find_text('Settings', location_hint=(0.9, 0.9, 0.3))) # located at bottom right
+pyautogui.click(screen_size.width/2, screen_size.height/2) # ensure focus
+pyautogui.hotkey('alt', 'f')
+pyautogui.hotkey('s')
 sleep(2)
 
 ## Open Advanced
