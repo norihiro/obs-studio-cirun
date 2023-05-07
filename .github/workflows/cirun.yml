@@ -86,6 +86,13 @@ jobs:
           path: obs-studio
           key: obs-studio
 
+      - name: 'Run unit tests'
+        run: |
+          cd obs-studio
+          cmake -DENABLE_UNIT_TESTS=ON build/
+          cmake --build build
+          cmake --build build -t test
+
       - name: 'Restore obs-build-dependencies directory'
         uses: actions/cache/save@v3
         if: ${{ steps.obs-build-dependencies-cache.outputs.cache-hit != 'true' }}
