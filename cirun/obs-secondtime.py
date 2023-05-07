@@ -185,6 +185,21 @@ sleep(1)
 cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW'})
 sleep(1)
 
+# Switch to the background scene
+cl.send('SetCurrentPreviewScene', {'sceneName': background_source})
+cl.send('TriggerStudioModeTransition')
+cl.send('SetCurrentPreviewScene', {'sceneName': background_source})
+sleep(1)
+
+# Upload the log file
+print('Uploading the log file...')
+u.capture()
+click_verbose(u.find_text('Help'))
+click_verbose(u.find_text('Log Files'))
+click_verbose(u.find_text('Upload Current Log File'))
+sleep(5)
+pyautogui.hotkey('enter')
+
 # Exit OBS
 cl.send('StopRecord')
 sleep(5)
