@@ -170,7 +170,7 @@ if flg_cleanup:
 
 # Exit OBS
 cl.send('StopRecord')
-sleep(1)
+sleep(5)
 pyautogui.click(screen_size.width/2, screen_size.height/2)
 pyautogui.hotkey('ctrl', 'q')
 sleep(2)
