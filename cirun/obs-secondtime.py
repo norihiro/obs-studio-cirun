@@ -170,7 +170,7 @@ for source in sources:
         cl.send('CreateSceneItem', {'sceneName': sceneName, 'sourceName': background_source})
     cl.send('CreateInput', source)
     cl.send('SetCurrentPreviewScene', {'sceneName': sceneName})
-    cl.send('TriggerStudioModeTransition')
+    cl.send('SetCurrentProgramScene', {'sceneName': sceneName})
     if sceneName == background_source:
         cl.send('StartRecord')
     sleep(2)
