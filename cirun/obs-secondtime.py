@@ -149,6 +149,13 @@ sources = [
             'inputSettings': {
                 },
             },
+        {
+            'inputName': 'xshm',
+            'sceneName': 'Scene Desktop',
+            'inputKind': 'xshm_input',
+            'inputSettings': {
+                },
+            },
         ]
 
 background_source = sources[0]['sceneName']
