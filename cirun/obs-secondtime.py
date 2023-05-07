@@ -142,6 +142,13 @@ sources = [
                     ],
                 },
             },
+        {
+            'inputName': 'browser',
+            'sceneName': 'Scene Browser',
+            'inputKind': 'browser_source',
+            'inputSettings': {
+                },
+            },
         ]
 
 background_source = sources[0]['sceneName']
