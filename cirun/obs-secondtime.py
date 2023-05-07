@@ -37,6 +37,7 @@ if flg_x11grab:
         '-framerate', '5',
         '-f', 'x11grab',
         '-i', os.environ['DISPLAY'],
+        '-x264-params', 'keyint=10:min-keyint=5',
         '-y', 'desktop-secondtime.mkv'
         ], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 

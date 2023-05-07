@@ -156,7 +156,9 @@ jobs:
           mv $HOME/.config/obs-studio/logs .
           mkdir -p recording
           mv $HOME/*.mp4 recording/ || true
-          mv desktop*.mkv recording/ || true
+          for i in desktop*.mkv; do
+            ffmpeg -loglevel error -i $i -c copy recording/${i/.mkv/.mp4} || true
+          done
           cp -a $HOME/.config/obs-studio config-obs-studio
 
       - name: 'Upload log files'
