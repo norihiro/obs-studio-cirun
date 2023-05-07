@@ -104,6 +104,14 @@ sleep(1)
 u.capture()
 u.screenshot.save('screenshot/secondtime-02-studiomode.png')
 
+# Set Streaming
+cl.send('SetStreamServiceSettings', {
+    'streamServiceType': 'rtmp_custom',
+    'streamServiceSettings': {
+        'server': 'rtmp://localhost/live',
+        'key': 'cirun',
+        }})
+
 # Create various scources
 scenes = set()
 for scene in cl.send('GetSceneList').scenes:
@@ -176,6 +184,7 @@ for source in sources:
     cl.send('SetCurrentProgramScene', {'sceneName': sceneName})
     if sceneName == background_source:
         cl.send('StartRecord')
+        cl.send('StartStream')
     if 'sleep_after_creation' in source:
         sleep(source['sleep_after_creation'])
     else:
@@ -224,6 +233,7 @@ pyautogui.hotkey('enter')
 
 # Exit OBS
 cl.send('StopRecord')
+cl.send('StopStream')
 sleep(5)
 pyautogui.click(screen_size.width/2, screen_size.height/2)
 pyautogui.hotkey('ctrl', 'q')

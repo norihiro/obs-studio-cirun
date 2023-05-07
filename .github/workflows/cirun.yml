@@ -110,6 +110,7 @@ jobs:
             apt-transport-https gnupg
             xvfb
             ffmpeg
+            nginx libnginx-mod-rtmp
             python3-pip
             python3-pil
             python3-tk python3-dev
@@ -129,6 +130,21 @@ jobs:
           git clone https://github.com/norihiro/untriseptium.git
           (cd untriseptium && pip3 install -U ./)
 
+          sudo tee -a /etc/nginx/nginx.conf <<-EOF
+          rtmp_auto_push on;
+          rtmp {
+            server {
+              listen 1935;
+              chunk_size 4096;
+              timeout 10s;
+              application live {
+                live on;
+                allow publish all;
+              }
+            }
+          }
+          EOF
+
       - name: 'Run first time'
         run: |
           mkdir screenshot
@@ -136,6 +152,7 @@ jobs:
 
       - name: 'Run second time'
         run: |
+          sudo nginx &
           mkdir -p screenshot
           timeout 10m xvfb-run cirun/obs-secondtime.py
 
