@@ -192,7 +192,10 @@ pyautogui.click(screen_size.width/2, screen_size.height/2)
 pyautogui.hotkey('ctrl', 'q')
 sleep(2)
 proc_obs.send_signal(subprocess.signal.SIGINT)
-proc_obs.communicate()
+try:
+    proc_obs.communicate(timeout=10)
+except subprocess.TimeoutExpired:
+    print('Error: failed to wait obs.')
 
 if flg_x11grab:
     proc_ffmpeg.stdin.write('q'.encode())
