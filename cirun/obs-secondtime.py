@@ -175,6 +175,16 @@ if flg_cleanup:
             cl.send('RemoveScene', {'sceneName': sceneName})
             scenes.remove(sceneName)
 
+# Open projectors
+cl.send('OpenSourceProjector', {'sourceName': background_source})
+sleep(1)
+cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW'})
+sleep(1)
+cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM'})
+sleep(1)
+cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW'})
+sleep(1)
+
 # Exit OBS
 cl.send('StopRecord')
 sleep(5)
