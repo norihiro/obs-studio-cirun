@@ -148,7 +148,10 @@ sources = [
             'sceneName': 'Scene Browser',
             'inputKind': 'browser_source',
             'inputSettings': {
+                'url': 'https://www.youtube.com/watch?v=ghuB0ozPttI&list=UULFp_UXGmCCIRaX5pyFljICoQ',
+                'reroute_audio': True,
                 },
+            'sleep_after_creation': 15,
             },
         {
             'inputName': 'xshm',
@@ -173,7 +176,10 @@ for source in sources:
     cl.send('SetCurrentProgramScene', {'sceneName': sceneName})
     if sceneName == background_source:
         cl.send('StartRecord')
-    sleep(2)
+    if 'sleep_after_creation' in source:
+        sleep(source['sleep_after_creation'])
+    else:
+        sleep(2)
 
 flg_cleanup = False
 if flg_cleanup:
