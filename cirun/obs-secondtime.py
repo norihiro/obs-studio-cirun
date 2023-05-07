@@ -108,6 +108,9 @@ scenes = set()
 for scene in cl.send('GetSceneList').scenes:
     scenes.add(scene['sceneName'])
 
+input_kinds = cl.send('GetInputKindList').input_kinds
+print('Available input-kinds are: ' + ' '.join(input_kinds))
+
 sources = [
         {
             'inputName': 'background',
