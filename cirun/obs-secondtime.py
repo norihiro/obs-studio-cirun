@@ -7,6 +7,7 @@ import pyautogui
 from untriseptium import Untriseptium
 from time import sleep
 import obsws_python as obsws
+from util import *
 
 
 flg_x11grab = True
@@ -183,14 +184,22 @@ if flg_cleanup:
             scenes.remove(sceneName)
 
 # Open projectors
+def _close_projector():
+    sleep(1)
+    pyautogui.rightClick(current_window_center())
+    sleep(0.5)
+    pyautogui.hotkey('up')
+    sleep(0.5)
+    pyautogui.hotkey('enter')
+
 cl.send('OpenSourceProjector', {'sourceName': background_source})
-sleep(1)
+_close_projector()
 cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW'})
-sleep(1)
+_close_projector()
 cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM'})
-sleep(1)
+_close_projector()
 cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW'})
-sleep(1)
+_close_projector()
 
 # Switch to the background scene
 cl.send('SetCurrentPreviewScene', {'sceneName': background_source})
