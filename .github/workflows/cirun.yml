@@ -171,8 +171,9 @@ jobs:
             --exclude '*/libnsgif/*' \
             --exclude '*/obs-outputs/librtmp/*' \
             --exclude '*/rnnoise/src/*' \
+            -q \
             -c -d . -o lcov.info
-          genhtml lcov.info -o ../coverage/
+          genhtml -q lcov.info -o ../coverage/
 
       - name: 'Gather log files'
         if: always()
@@ -183,7 +184,7 @@ jobs:
           for i in desktop*.mkv; do
             ffmpeg -loglevel error -i $i -c copy recording/${i/.mkv/.mp4} || true
           done
-          cp -a $HOME/.config/obs-studio config-obs-studio
+          rsync -a --exclude obs-browser $HOME/.config/obs-studio/ config-obs-studio/
 
       - name: 'Upload log files'
         if: always()
@@ -198,7 +199,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-          rsync -av logs config-obs-studio coverage screenshot recording "${CIRUN_DEPLOY_TARGET}"
+          rsync -a logs config-obs-studio coverage screenshot recording "${CIRUN_DEPLOY_TARGET}"
 
       - name: 'Upload results'
         if: always()
