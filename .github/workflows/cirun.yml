@@ -120,6 +120,7 @@ jobs:
           apt_packages=(
             apt-transport-https gnupg
             xvfb
+            x11-xserver-utils
             ffmpeg
             nginx libnginx-mod-rtmp
             python3-pip
