@@ -25,6 +25,24 @@ def get_obsws_password():
     config.read(home + '/.config/obs-studio/global.ini')
     return config['OBSWebSocket']['ServerPassword']
 
+def ocr_topwindow(mode=None, length=0, ratio=-1):
+    sleep(0.1)
+    u.capture()
+    geometry = current_window_geometry()
+    if ratio > 0 and (mode=='left' or mode=='right'):
+        length = int((geometry[2] - geometry[0]) * ratio)
+    elif ratio > 0 and (mode=='top' or mode=='bottom'):
+        length = int((geometry[3] - geometry[1]) * ratio)
+    if mode=='left':
+        geometry = (geometry[0], geometry[1], min(geometry[0] + length, geometry[2]), geometry[3])
+    elif mode=='top':
+        geometry = (geometry[0], geometry[1], geometry[2], min(geometry[1] + length, geometry[3]))
+    elif mode=='right':
+        geometry = (min(geometry[2] - length, geometry[0]), geometry[1], geometry[2], geometry[3])
+    elif mode=='bottom':
+        geometry = (geometry[0], min(geometry[3] - length, geometry[1]), geometry[2], geometry[3])
+    u.ocr(crop=geometry)
+
 def click_verbose(t):
     print(f'Clicking text={t.text} location={t.location} confidence={t.confidence}')
     t.click()
@@ -49,14 +67,16 @@ sleep(5)
 # Configure obs-websocket
 ## Open obs-websocket dialog
 print('Opening Tools -> WebSocket Server Settings...')
-u.capture()
+ocr_topwindow(mode='top', length=100)
 u.screenshot.save('screenshot/secondtime-01-init.png')
-click_verbose(u.find_text('Tools', location_hint=(0.5, 0.0, 0.3)))
-u.capture()
+click_verbose(u.find_text('Tools'))
+ocr_topwindow(mode='top', length=500)
 u.screenshot.save('screenshot/secondtime-01-menu-tools.png')
 click_verbose(u.find_text('WebSocket Server Settings'))
 
 ## Enable obs-websocket
+click_verbose(u.find_text('Plugin Settings')) # click somewhere to raise window
+ocr_topwindow()
 click_verbose(u.find_text('Enable WebSocket server'))
 
 u.capture()
@@ -84,7 +104,7 @@ u.capture()
 click_verbose(u.find_text('Advanced'))
 
 ## Enable autoremux
-u.capture()
+ocr_topwindow()
 click_verbose(u.find_text('Automatically remux to mp4'))
 u.capture()
 u.screenshot.save('screenshot/secondtime-02-settings-advanced.png')
@@ -226,7 +246,9 @@ sleep(1)
 print('Uploading the log file...')
 u.capture()
 click_verbose(u.find_text('Help'))
+ocr_topwindow(mode='top', length=500)
 click_verbose(u.find_text('Log Files'))
+ocr_topwindow(mode='top', length=500)
 click_verbose(u.find_text('Upload Current Log File'))
 sleep(5)
 pyautogui.hotkey('enter')
