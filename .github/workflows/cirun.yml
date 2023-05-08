@@ -110,6 +110,7 @@ jobs:
             apt-transport-https gnupg
             xvfb
             ffmpeg
+            v4l2loopback-dkms
             nginx libnginx-mod-rtmp
             python3-pip
             python3-pil
@@ -153,6 +154,7 @@ jobs:
       - name: 'Run second time'
         run: |
           sudo nginx &
+          sudo modprobe v4l2loopback || echo 'Silently failed to load v4l2loopback.'
           mkdir -p screenshot
           timeout 10m xvfb-run cirun/obs-secondtime.py
 
