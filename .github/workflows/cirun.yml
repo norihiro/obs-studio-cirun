@@ -18,6 +18,14 @@ jobs:
       - name: 'Checkout run-script'
         uses: actions/checkout@v3
 
+      - name: 'Setup (0)'
+        id: setup0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha="$(gh api /repos/obsproject/obs-studio/commits | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
+          echo "obsHashAPI=$sha" >> $GITHUB_OUTPUT
+
       - uses: actions/cache@v3
         with:
           path: ~/.cache/pip
@@ -30,15 +38,8 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: obs-studio
-          key: obs-studio
-
-      - name: 'Restore obs-build-dependencies directory'
-        id: obs-build-dependencies-cache
-        if: github.event_name != 'schedule'
-        uses: actions/cache/restore@v3
-        with:
-          path: obs-build-dependencies
-          key: obs-build-dependencies
+          key: obs-studio-${{ steps.setup0.outputs.obsHashAPI }}
+          restore-keys: obs-studio-
 
       - name: 'Checkout obs-studio'
         uses: actions/checkout@v3
@@ -55,12 +56,22 @@ jobs:
           (cd obs-studio && git pull && git submodule update --recursive)
           echo "obsHash=$(cd obs-studio && git rev-parse --short=9 HEAD)" >> $GITHUB_OUTPUT
 
+      - name: 'Restore obs-build-dependencies directory'
+        id: obs-build-dependencies-cache
+        if: github.event_name != 'schedule'
+        uses: actions/cache/restore@v3
+        with:
+          path: obs-build-dependencies
+          key: obs-build-dependencies-${{ steps.setup.outputs.obsHash }}
+          restore-keys: obs-build-dependencies-
+
       - name: 'Restore ccache'
         id: ccache-cache
         uses: actions/cache/restore@v3
         with:
           path: ${{ github.workspace }}/.ccache
-          key: cirun-ccache
+          key: cirun-ccache-${{ steps.setup.outputs.obsHash }}
+          restore-keys: cirun-ccache-
 
       - name: 'Configure and build obs-studio'
         run: |
@@ -77,14 +88,21 @@ jobs:
         if: always()
         with:
           path: ${{ github.workspace }}/.ccache
-          key: cirun-ccache
+          key: cirun-ccache-${{ steps.setup.outputs.obsHash }}
 
       - name: 'Save obs-studio build directory'
         uses: actions/cache/save@v3
         if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         with:
           path: obs-studio
-          key: obs-studio
+          key: obs-studio-${{ steps.setup.outputs.obsHash }}
+
+      - name: 'Restore obs-build-dependencies directory'
+        uses: actions/cache/save@v3
+        if: ${{ steps.obs-build-dependencies-cache.outputs.cache-hit != 'true' }}
+        with:
+          path: obs-build-dependencies
+          key: obs-build-dependencies-${{ steps.setup.outputs.obsHash }}
 
       - name: 'Run unit tests'
         run: |
@@ -92,13 +110,6 @@ jobs:
           cmake -DENABLE_UNIT_TESTS=ON build/
           cmake --build build
           cmake --build build -t test
-
-      - name: 'Restore obs-build-dependencies directory'
-        uses: actions/cache/save@v3
-        if: ${{ steps.obs-build-dependencies-cache.outputs.cache-hit != 'true' }}
-        with:
-          path: obs-build-dependencies
-          key: obs-build-dependencies
 
       - name: 'Install obs-studio and test suites'
         run: |
