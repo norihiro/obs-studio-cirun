@@ -156,6 +156,18 @@ sources = [
             'inputSettings': {
                 'text': 'Text Source',
                 },
+            'update_settings': [
+                {
+                    'outline': True,
+                    },
+                {
+                    'outline': False,
+                    'drop_shadow': True,
+                    },
+                {
+                    'drop_shadow': False,
+                    },
+                ]
             },
         {
             'inputName': 'images',
@@ -177,9 +189,17 @@ sources = [
             'inputKind': 'browser_source',
             'inputSettings': {
                 'url': 'https://www.youtube.com/watch?v=ghuB0ozPttI&list=UULFp_UXGmCCIRaX5pyFljICoQ',
-                'reroute_audio': True,
+                'reroute_audio': False,
                 },
-            'sleep_after_creation': 15,
+            'sleep_after_creation': 5,
+            'update_settings': [
+                {
+                    'reroute_audio': True
+                    },
+                {
+                    'reroute_audio': False
+                    },
+                ]
             },
         {
             'inputName': 'xshm',
@@ -209,6 +229,16 @@ for source in sources:
         sleep(source['sleep_after_creation'])
     else:
         sleep(2)
+    if 'update_settings' in source:
+        for settings in source['update_settings']:
+            name = source['inputName']
+            data = {'inputName': name, 'inputSettings': settings}
+            print('SetInputSettings %s' % data)
+            cl.send('SetInputSettings', data)
+            if 'sleep_after_creation' in source:
+                sleep(source['sleep_after_creation'])
+            else:
+                sleep(2)
 
 flg_cleanup = False
 if flg_cleanup:
