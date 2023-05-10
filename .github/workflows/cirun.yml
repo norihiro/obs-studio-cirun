@@ -157,6 +157,11 @@ jobs:
           }
           EOF
 
+      - name: 'Run just version and help'
+        run: |
+          obs --version
+          obs --help
+
       - name: 'Run first time'
         run: |
           mkdir screenshot
