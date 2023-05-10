@@ -259,7 +259,20 @@ def _close_projector():
 
 cl.send('OpenSourceProjector', {'sourceName': background_source})
 _close_projector()
-cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW'})
+cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW', 'monitorIndex': 0})
+## click `Always On Top`
+sleep(1)
+pyautogui.rightClick()
+sleep(0.2)
+pyautogui.hotkey('up')
+pyautogui.hotkey('up')
+sleep(1.0)
+pyautogui.hotkey('enter')
+## click a source to make transition
+pyautogui.click((int(screen_size[0] * 0.6), int(screen_size[1] * 0.6)))
+sleep(0.1)
+pyautogui.doubleClick((int(screen_size[0] * 0.3), int(screen_size[1] * 0.6)))
+sleep(0.2)
 _close_projector()
 cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM'})
 _close_projector()
