@@ -3,6 +3,7 @@
 import configparser
 import os
 import subprocess
+import random
 import pyautogui
 from untriseptium import Untriseptium
 from time import sleep
@@ -140,6 +141,12 @@ for scene in cl.send('GetSceneList').scenes:
 input_kinds = cl.send('GetInputKindList').input_kinds
 print('Available input-kinds are: ' + ' '.join(input_kinds))
 
+def _mouse_move_around_preview():
+    geometry = current_window_geometry()
+    x = int(random.uniform(geometry[0] + 10, (geometry[0] * 2 + geometry[2] * 1) / 3))
+    y = int(random.uniform(geometry[1] + 50, (geometry[1] * 3 + geometry[3] * 2) / 5))
+    pyautogui.moveTo(x, y)
+
 sources = [
         {
             'inputName': 'background',
@@ -239,6 +246,12 @@ for source in sources:
                 sleep(source['sleep_after_creation'])
             else:
                 sleep(2)
+    _mouse_move_around_preview()
+    # Open Transform dialog and close
+    sleep(0.2); pyautogui.click()
+    sleep(0.2); pyautogui.hotkey('ctrl', 'e')
+    sleep(0.2); pyautogui.hotkey('esc')
+    sleep(0.2); pyautogui.hotkey('esc')
 
 flg_cleanup = False
 if flg_cleanup:
