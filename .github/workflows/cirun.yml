@@ -173,6 +173,10 @@ jobs:
           mkdir -p screenshot
           timeout 10m xvfb-run cirun/obs-secondtime.py
 
+      - name: 'Start again and just exit'
+        run: |
+          timeout 3m xvfb-run timeout -s SIGINT --preserve-status -k 10 10 obs
+
       - name: 'Gather coverage data'
         if: always()
         run: |
