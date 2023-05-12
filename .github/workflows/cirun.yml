@@ -175,7 +175,7 @@ jobs:
 
       - name: 'Start again and just exit'
         run: |
-          timeout 3m xvfb-run timeout -s SIGINT --preserve-status -k 10 10 obs
+          timeout 3m xvfb-run timeout -s SIGINT --preserve-status -k 30 10 obs
 
       - name: 'Gather coverage data'
         if: always()
