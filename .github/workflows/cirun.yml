@@ -298,6 +298,7 @@ jobs:
           fi
 
           cd obs-studio
+          patch -p1 < ../patch/cmake-coverage.patch
           rm -rf build_x86_64/OBS.app
           export -n SEEKING_TESTERS
           export TERM=''

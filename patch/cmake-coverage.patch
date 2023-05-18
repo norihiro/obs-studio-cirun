@@ -1,16 +1,16 @@
 diff --git a/cmake/Modules/CompilerConfig.cmake b/cmake/Modules/CompilerConfig.cmake
-index 41c56da8b..3784cd03b 100644
+index 849d19de7..13198d1e7 100644
 --- a/cmake/Modules/CompilerConfig.cmake
 +++ b/cmake/Modules/CompilerConfig.cmake
-@@ -101,6 +101,7 @@ else()
- 
-   option(CALM_DEPRECATION "Keep deprecated-declarations as warnings" OFF)
+@@ -108,6 +108,7 @@ else()
+     - https://github.com/obsproject/obs-studio/issues/8850 for 13.1.1
+   ]]
    add_compile_options(
 +    -coverage
      -Werror
      -Wextra
      -Wvla
-@@ -136,6 +137,8 @@ else()
+@@ -137,6 +138,8 @@ else()
      add_link_options("LINKER:$<$<PLATFORM_ID:Darwin>:-adhoc_codesign>")
    endif()
  
@@ -19,3 +19,16 @@ index 41c56da8b..3784cd03b 100644
    if(MINGW)
      set(CMAKE_WIDL
          "widl"
+diff --git a/cmake/macos/compilerconfig.cmake b/cmake/macos/compilerconfig.cmake
+index 987ea0923..5cb189e06 100644
+--- a/cmake/macos/compilerconfig.cmake
++++ b/cmake/macos/compilerconfig.cmake
+@@ -71,3 +71,8 @@ if(NOT XCODE)
+ endif()
+ 
+ add_compile_definitions("$<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<CONFIG:DEBUG>>:DEBUG;_DEBUG>")
++
++if(XCODE)
++  add_compile_options(-fprofile-arcs -ftest-coverage)
++  add_link_options(--coverage)
++endif()
