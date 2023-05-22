@@ -3,65 +3,79 @@
 import os
 import subprocess
 import pyautogui
-from untriseptium import Untriseptium
 from time import sleep
-
-flg_x11grab = True
+from obsexec import OBSExec
+import obsconfig
+import desktoprecord
+import util
 
 sleep(1)
-u = Untriseptium()
+u = util.u
 screen_size = pyautogui.size()
 
-if flg_x11grab:
-    proc_ffmpeg = subprocess.Popen([
-        'ffmpeg',
-        '-loglevel', 'error',
-        '-video_size', f'{screen_size.width}x{screen_size.height}',
-        '-framerate', '5',
-        '-f', 'x11grab',
-        '-i', os.environ['DISPLAY'],
-        '-x264-params', 'keyint=10:min-keyint=5',
-        '-y', 'desktop-firsttime.mkv'
-        ], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+util.set_screenshot_prefix('screenshot/01-firsttime-')
+
+record = desktoprecord.DesktopRecord(filename='desktop-firsttime.mkv')
 
 # Start OBS Studio
-os.system('rm -rf $HOME/.config/obs-studio')
-os.system('obs &>/dev/null &')
-sleep(5)
-u.capture()
-u.screenshot.save('screenshot/firsttime-0.png')
+obs = OBSExec(obsconfig.OBSConfigClean())
+
+util.wait_text('Specify what you want to use the program for', timeout=5)
+util.take_screenshot()
 
 # Continue the wizard
-tt = u.find_texts('Optimize just for recording, I will not be streaming')
-tt[0].click()
-u.capture()
-u.screenshot.save('screenshot/firsttime-1.png')
+util.click_verbose(u.find_text('Optimize just for recording, I will not be streaming'))
+util.take_screenshot()
+pyautogui.hotkey('enter') # Next
+util.take_screenshot()
+
 pyautogui.hotkey('enter') # Next
 sleep(2)
-u.capture()
-u.screenshot.save('screenshot/firsttime-2.png')
-pyautogui.hotkey('enter') # Next
-sleep(2)
-u.capture()
-u.screenshot.save('screenshot/firsttime-3.png')
-while True:
-    sleep(2)
-    u.capture()
-    t = u.find_text('Testing complete')
-    if t.confidence > 0.9:
-        break
-u.screenshot.save('screenshot/firsttime-4.png')
+util.take_screenshot()
+
+util.wait_text('Testing complete', timeout=300)
+util.take_screenshot()
+
 pyautogui.hotkey('enter') # Apply Settings
 pyautogui.click(screen_size.width/2, screen_size.height/2)
-u.capture()
-u.screenshot.save('screenshot/firsttime-5.png')
-pyautogui.hotkey('ctrl', 'q')
+util.take_screenshot()
+
+# Open obs-websocket dialog
+util.set_screenshot_prefix('screenshot/01-websocket-')
+util.take_screenshot()
+util.ocr_topwindow(mode='top', length=100)
+util.click_verbose(u.find_text('Tools'))
+util.take_screenshot()
+util.ocr_topwindow(mode='top', length=500)
+util.click_verbose(u.find_text('WebSocket Server Settings'))
+util.take_screenshot()
+
+## Enable obs-websocket
+util.click_verbose(u.find_text('Plugin Settings')) # click somewhere to raise window
+util.take_screenshot()
+util.ocr_topwindow()
+util.click_verbose(u.find_text('Enable WebSocket server'))
+util.take_screenshot()
+
+pyautogui.hotkey('enter')
+util.take_screenshot()
+
+# Terminate OBS
+obs.term()
+
+record.stop()
+
 sleep(1)
 
-if flg_x11grab:
-    proc_ffmpeg.stdin.write('q'.encode())
-    proc_ffmpeg.stdin.flush()
-    proc_ffmpeg.stdin.close()
-    proc_ffmpeg.communicate()
+obs.config.save('obs-config-firsttime')
 
-sleep(1)
+obsconfig.append_preset(obs.config)
+
+profile = obs.config.get_profile()
+profile['Video']['BaseCX'] = '1280'
+profile['Video']['BaseCY'] = '720'
+profile['Video']['OutputCX'] = '1280'
+profile['Video']['OutputCY'] = '720'
+profile.save()
+
+obs.config.save('obs-config-default')

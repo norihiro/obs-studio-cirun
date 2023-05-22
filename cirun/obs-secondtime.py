@@ -1,95 +1,31 @@
 #! /usr/bin/env python3
 
-import configparser
 import os
 import subprocess
 import random
 import pyautogui
-from untriseptium import Untriseptium
 from time import sleep
-import obsws_python as obsws
-from util import *
-
-
-flg_x11grab = True
+from obsexec import OBSExec
+import obsconfig
+import desktoprecord
+import util
 
 
 sleep(1)
-u = Untriseptium()
-u.ocrengine.ocr_split_height = 32
+u = util.u
 screen_size = pyautogui.size()
 
+util.set_screenshot_prefix('screenshot/02-settings-')
 
-def get_obsws_password():
-    config = configparser.ConfigParser()
-    home = os.environ['HOME']
-    config.read(home + '/.config/obs-studio/global.ini')
-    return config['OBSWebSocket']['ServerPassword']
-
-def ocr_topwindow(mode=None, length=0, ratio=-1):
-    sleep(0.1)
-    u.capture()
-    geometry = current_window_geometry()
-    if ratio > 0 and (mode=='left' or mode=='right'):
-        length = int((geometry[2] - geometry[0]) * ratio)
-    elif ratio > 0 and (mode=='top' or mode=='bottom'):
-        length = int((geometry[3] - geometry[1]) * ratio)
-    if mode=='left':
-        geometry = (geometry[0], geometry[1], min(geometry[0] + length, geometry[2]), geometry[3])
-    elif mode=='top':
-        geometry = (geometry[0], geometry[1], geometry[2], min(geometry[1] + length, geometry[3]))
-    elif mode=='right':
-        geometry = (min(geometry[2] - length, geometry[0]), geometry[1], geometry[2], geometry[3])
-    elif mode=='bottom':
-        geometry = (geometry[0], min(geometry[3] - length, geometry[1]), geometry[2], geometry[3])
-    u.ocr(crop=geometry)
-
-def click_verbose(t):
-    print(f'Clicking text={t.text} location={t.location} confidence={t.confidence}')
-    t.click()
-    sleep(0.2)
-
-if flg_x11grab:
-    proc_ffmpeg = subprocess.Popen([
-        'ffmpeg',
-        '-loglevel', 'error',
-        '-video_size', f'{screen_size.width}x{screen_size.height}',
-        '-framerate', '5',
-        '-f', 'x11grab',
-        '-i', os.environ['DISPLAY'],
-        '-x264-params', 'keyint=10:min-keyint=5',
-        '-y', 'desktop-secondtime.mkv'
-        ], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+record = desktoprecord.DesktopRecord(filename='desktop-secondtime.mkv')
 
 # Start OBS Studio
-proc_obs = subprocess.Popen(['obs'])
-sleep(5)
-
-# Configure obs-websocket
-## Open obs-websocket dialog
-print('Opening Tools -> WebSocket Server Settings...')
-ocr_topwindow(mode='top', length=100)
-u.screenshot.save('screenshot/secondtime-01-init.png')
-click_verbose(u.find_text('Tools'))
-ocr_topwindow(mode='top', length=500)
-u.screenshot.save('screenshot/secondtime-01-menu-tools.png')
-click_verbose(u.find_text('WebSocket Server Settings'))
-
-## Enable obs-websocket
-click_verbose(u.find_text('Plugin Settings')) # click somewhere to raise window
-ocr_topwindow()
-click_verbose(u.find_text('Enable WebSocket server'))
-
-u.capture()
-u.screenshot.save('screenshot/secondtime-01-obswebsocket.png')
-pyautogui.hotkey('enter')
-sleep(1)
-u.capture()
-u.screenshot.save('screenshot/secondtime-01-obswebsocket-end.png')
-## Ensure to close dialog
-for i in range(0, 3):
-    sleep(1)
-    pyautogui.hotkey('esc')
+obs = OBSExec(obsconfig.OBSConfigCopyFromSaved('obs-config-default'))
+try:
+    util.wait_text('File Edit View Dock Profile Scene Collection Tools Help', timeout=10,
+                   ocrfunc=lambda u: util.ocr_topwindow(mode='top', length=200))
+except TimeoutError:
+    pass
 
 # Configure settings
 ## Open
@@ -102,13 +38,12 @@ sleep(2)
 ## Open Advanced
 print('Opening Advanced tab')
 u.capture()
-click_verbose(u.find_text('Advanced'))
+util.click_verbose(u.find_text('Advanced'))
 
 ## Enable autoremux
-ocr_topwindow()
-click_verbose(u.find_text('Automatically remux to mp4'))
-u.capture()
-u.screenshot.save('screenshot/secondtime-02-settings-advanced.png')
+util.ocr_topwindow()
+util.click_verbose(u.find_text('Automatically remux to mp4'))
+util.take_screenshot()
 pyautogui.hotkey('enter')
 
 ## Ensure to close dialog
@@ -116,14 +51,13 @@ for i in range(0, 3):
     sleep(1)
     pyautogui.hotkey('esc')
 
-# Start obs-websocket client
-cl = obsws.ReqClient(host='localhost', port=4455, password=get_obsws_password())
+# Open obs-websocket client
+cl = obs.get_obsws()
 
 # Set Studio Mode
 cl.set_studio_mode_enabled(True)
 sleep(1)
-u.capture()
-u.screenshot.save('screenshot/secondtime-02-studiomode.png')
+util.take_screenshot()
 
 # Set Streaming
 cl.send('SetStreamServiceSettings', {
@@ -142,10 +76,12 @@ input_kinds = cl.send('GetInputKindList').input_kinds
 print('Available input-kinds are: ' + ' '.join(input_kinds))
 
 def _mouse_move_around_preview():
-    geometry = current_window_geometry()
+    geometry = util.current_window_geometry()
     x = int(random.uniform(geometry[0] + 10, (geometry[0] * 2 + geometry[2] * 1) / 3))
     y = int(random.uniform(geometry[1] + 50, (geometry[1] * 3 + geometry[3] * 2) / 5))
     pyautogui.moveTo(x, y)
+
+util.set_screenshot_prefix('screenshot/02-various-source-')
 
 sources = [
         {
@@ -234,8 +170,7 @@ for source in sources:
         cl.send('StartStream')
     if 'sleep_after_creation' in source:
         sleep(source['sleep_after_creation'])
-    else:
-        sleep(2)
+    util.take_screenshot()
     if 'update_settings' in source:
         for settings in source['update_settings']:
             name = source['inputName']
@@ -244,8 +179,7 @@ for source in sources:
             cl.send('SetInputSettings', data)
             if 'sleep_after_creation' in source:
                 sleep(source['sleep_after_creation'])
-            else:
-                sleep(2)
+            util.take_screenshot()
     _mouse_move_around_preview()
     # Open Transform dialog and close
     sleep(0.2); pyautogui.click()
@@ -261,10 +195,11 @@ if flg_cleanup:
             cl.send('RemoveScene', {'sceneName': sceneName})
             scenes.remove(sceneName)
 
+util.set_screenshot_prefix('screenshot/02-projectors-')
 # Open projectors
 def _close_projector():
     sleep(1)
-    pyautogui.rightClick(current_window_center())
+    pyautogui.rightClick(util.current_window_center())
     sleep(0.5)
     pyautogui.hotkey('up')
     sleep(0.5)
@@ -274,7 +209,7 @@ cl.send('OpenSourceProjector', {'sourceName': background_source})
 _close_projector()
 cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW', 'monitorIndex': 0})
 ## click `Always On Top`
-sleep(1)
+util.take_screenshot()
 pyautogui.rightClick()
 sleep(0.2)
 pyautogui.hotkey('up')
@@ -286,10 +221,15 @@ pyautogui.click((int(screen_size[0] * 0.6), int(screen_size[1] * 0.6)))
 sleep(0.1)
 pyautogui.doubleClick((int(screen_size[0] * 0.3), int(screen_size[1] * 0.6)))
 sleep(0.2)
+util.take_screenshot()
 _close_projector()
+
 cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM'})
+util.take_screenshot()
 _close_projector()
+
 cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW'})
+util.take_screenshot()
 _close_projector()
 
 # Switch to the background scene
@@ -300,36 +240,25 @@ sleep(1)
 
 # Upload the log file
 print('Uploading the log file...')
-u.capture()
-click_verbose(u.find_text('Help'))
-ocr_topwindow(mode='top', length=500)
-click_verbose(u.find_text('Log Files'))
-ocr_topwindow(mode='top', length=500)
-click_verbose(u.find_text('Upload Current Log File'))
+util.set_screenshot_prefix('screenshot/02-upload-log-')
+util.take_screenshot()
+util.click_verbose(u.find_text('Help'))
+util.take_screenshot()
+util.ocr_topwindow(mode='top', length=500)
+util.click_verbose(u.find_text('Log Files'))
+util.take_screenshot()
+util.ocr_topwindow(mode='top', length=500)
+util.click_verbose(u.find_text('Upload Current Log File'))
+util.take_screenshot()
 sleep(5)
 pyautogui.hotkey('enter')
+util.take_screenshot()
 
-# Exit OBS
+# Terminate OBS
 cl.send('StopRecord')
 cl.send('StopStream')
 sleep(5)
 pyautogui.click(screen_size.width/2, screen_size.height/2)
-pyautogui.hotkey('ctrl', 'q')
-try:
-    proc_obs.communicate(timeout=10)
-except subprocess.TimeoutExpired:
-    print('Error: ctrl+q could not terminate obs.')
-    proc_obs.send_signal(subprocess.signal.SIGINT)
-    try:
-        proc_obs.communicate(timeout=10)
-    except subprocess.TimeoutExpired:
-        print('Error: SIGINT failed to terminate obs.')
-        proc_obs.send_signal(subprocess.signal.SIGKILL)
+obs.term()
 
-if flg_x11grab:
-    proc_ffmpeg.stdin.write('q'.encode())
-    proc_ffmpeg.stdin.flush()
-    proc_ffmpeg.stdin.close()
-    proc_ffmpeg.communicate()
-
-sleep(1)
+record.stop()
