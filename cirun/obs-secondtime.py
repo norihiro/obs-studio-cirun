@@ -257,7 +257,8 @@ util.take_screenshot()
 # Terminate OBS
 cl.send('StopRecord')
 cl.send('StopStream')
-sleep(5)
+cl.base_client.ws.close()
+sleep(15) # wait enough to ensure remux has finished.
 pyautogui.click(screen_size.width/2, screen_size.height/2)
 obs.term()
 
