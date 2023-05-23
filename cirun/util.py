@@ -50,7 +50,8 @@ def wait_text(text, confidence_threshold=0.9, sleep_each=1, timeout=None, ocrfun
         if len(tt) > 0 and tt[0].confidence > confidence_threshold:
             break
         if timeout and time_passed >= timeout:
-            raise TimeoutError
+            s_bestmatch = f'current best match is "{tt[0].text}"' if len(tt) else 'no matching text'
+            raise TimeoutError(f'Cannot find "{text}" {s_bestmatch}')
 
 
 def click_verbose(t):
