@@ -165,7 +165,7 @@ jobs:
       - name: 'Run first time'
         run: |
           mkdir screenshot
-          timeout 3m xvfb-run cirun/obs-firsttime.py
+          timeout 3m xvfb-run cirun/firsttime.py
 
       - name: 'Run second time'
         run: |
