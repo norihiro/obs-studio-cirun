@@ -10,6 +10,7 @@ import desktoprecord
 import util
 
 u = util.u
+record = None
 
 def run_firsttime():
     global obs, record
@@ -17,7 +18,8 @@ def run_firsttime():
 
     util.set_screenshot_prefix('screenshot/01-firsttime-')
 
-    record = desktoprecord.DesktopRecord(filename='desktop-firsttime.mkv')
+    if sys.platform != 'darwin':
+        record = desktoprecord.DesktopRecord(filename='desktop-firsttime.mkv')
 
     # Start OBS Studio
     obs = OBSExec(obsconfig.OBSConfigClean())
@@ -67,7 +69,8 @@ def configure_websocket_by_ui():
 def terminate_firsttime():
     global obs, record
     obs.term()
-    record.stop()
+    if record:
+        record.stop()
 
     sleep(1)
 
