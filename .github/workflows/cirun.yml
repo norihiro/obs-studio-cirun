@@ -342,6 +342,27 @@ jobs:
           mv $HOME/'Library/Application Support/obs-studio/logs' .
           exit 0
 
+      - name: 'Gather coverage data'
+        if: always()
+        run: |
+          set -e
+          cd obs-studio
+          brew install lcov
+          lcov \
+            --exclude '/Applications/*' \
+            --exclude '/usr/local/*' \
+            --exclude '*/.deps/*' \
+            --exclude '*_autogen/*' \
+            --exclude '*/deps/*' \
+            --exclude '*/ftl-sdk/*' \
+            --exclude '*/decklink-sdk/*' \
+            --exclude '*/libnsgif/*' \
+            --exclude '*/obs-outputs/librtmp/*' \
+            --exclude '*/rnnoise/src/*' \
+            -q \
+            -c -d . -o ../lcov.info
+          genhtml -q ../lcov.info -o ../coverage/
+
       - name: 'Upload log files'
         if: always()
         env:
@@ -355,7 +376,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-          rsync -a logs screenshot "${CIRUN_DEPLOY_TARGET}/macos/"
+          rsync -a logs screenshot lcov.info coverage "${CIRUN_DEPLOY_TARGET}/macos/"
 
       - name: Upload
         if: always()
