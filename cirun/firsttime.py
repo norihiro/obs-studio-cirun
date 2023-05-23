@@ -89,5 +89,7 @@ def terminate_firsttime():
 
 if __name__ == '__main__':
     run_firsttime();
-    configure_websocket_by_ui()
+    if sys.platform == 'linux':
+        # TODO: Run in a separated test case
+        configure_websocket_by_ui()
     terminate_firsttime()
