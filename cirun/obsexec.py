@@ -8,6 +8,7 @@ import subprocess
 from time import sleep
 import pyautogui
 import obsws_python
+import util
 
 class OBSExec:
     def __init__(self, config=None, run=True):
@@ -42,14 +43,22 @@ class OBSExec:
             except subprocess.TimeoutExpired:
                 print('Error: failed to wait obs though SIGKILL was sent.')
         elif sys.platform == 'darwin':
-            for cmd in ('killall -s SIGINT', 'killall'):
-                retry = 4
+            try:
+                util.u.ocr(crop=(0, 0, 216, 40))
+                util.click_verbose(util.u.find_text('OBS Studio'))
+                util.u.ocr(crop=(0, 0, 480, 540))
+                util.click_verbose(util.u.find_text('Exit'))
+            except:
+                print('Error: failed to open menu to exit')
+                util.take_screenshot()
+            for cmd in ('killall -INT', 'killall'):
+                retry = 2
                 while retry > 0:
                     ret = os.system(f'{cmd} OBS')
                     if ret != 0:
                         return
                     retry -= 1
-                    sleep(2)
+                    sleep(10)
 
     def get_obsws(self):
         global_cfg = self.config.get_global()
