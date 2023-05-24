@@ -250,7 +250,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sha="$(gh api /repos/obsproject/obs-studio/commits | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
+          patchhash=$(git log -1 --format='%h' patch/)
           echo "obsHashAPI=$sha" >> $GITHUB_OUTPUT
+          echo "patchHash=$patchHash" >> $GITHUB_OUTPUT
 
       - name: 'Restore obs-studio directory'
         id: obs-studio-cache
@@ -258,10 +260,11 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: obs-studio
-          key: obs-studio-macos-${{ steps.setup0.outputs.obsHashAPI }}
+          key: obs-studio-macos-${{ steps.setup0.outputs.obsHashAPI }}-${{ steps.setup0.outputs.patchHash }}
           restore-keys: obs-studio-macos-
 
       - name: 'Checkout obs-studio'
+        if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v3
         with:
           repository: 'obsproject/obs-studio'
@@ -273,7 +276,6 @@ jobs:
       - name: 'Setup build environment'
         id: setup
         run: |
-          (cd obs-studio && git pull && git submodule update --recursive)
           echo "obsHash=$(cd obs-studio && git rev-parse --short=9 HEAD)" >> $GITHUB_OUTPUT
 
       - name: 'Restore ccache from cache'
@@ -286,6 +288,7 @@ jobs:
             ${{ runner.os }}-ccache-
 
       - name: 'Build OBS'
+        if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         run: |
           REMOVE_FORMULAS=""
           for FORMULA in ${{ env.BLOCKED_FORMULAS }}; do
@@ -319,7 +322,7 @@ jobs:
         if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         with:
           path: obs-studio
-          key: obs-studio-macos-${{ steps.setup.outputs.obsHash }}
+          key: obs-studio-macos-${{ steps.setup.outputs.obsHash }}-${{ steps.setup0.outputs.patchHash }}
 
       - name: 'Prepare desktop'
         uses: paulz/prepare-macos@v1
