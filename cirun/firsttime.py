@@ -88,8 +88,23 @@ def terminate_firsttime():
     obs.config.save('obs-config-default')
 
 if __name__ == '__main__':
-    run_firsttime();
-    if sys.platform == 'linux':
-        # TODO: Run in a separated test case
-        configure_websocket_by_ui()
-    terminate_firsttime()
+    ret = 0
+    try:
+        run_firsttime();
+        if sys.platform == 'linux':
+            # TODO: Run in a separated test case
+            configure_websocket_by_ui()
+    except:
+        ret = 1
+        import traceback
+        traceback.print_exc(file=sys.stdout)
+        util.take_screenshot(capture=False)
+    try:
+        terminate_firsttime()
+    except:
+        ret = 2
+        import traceback
+        traceback.print_exc()
+        util.take_screenshot()
+    if ret:
+        sys.exit(ret)
