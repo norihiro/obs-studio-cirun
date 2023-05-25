@@ -78,9 +78,17 @@ sources = [
             'skip': (sys.platform != 'linux')
             },
         {
-            'inputName': 'avcapture',
-            'sceneName': 'AV Capture Input',
-            'inputKind': 'av_capture_input',
+            'inputName': 'screen',
+            'sceneName': 'Screen Capture',
+            'inputKind': 'screen_capture',
+            'inputSettings': {
+                },
+            'skip': (sys.platform != 'darwin')
+            },
+        {
+            'inputName': 'display',
+            'sceneName': 'Display Capture',
+            'inputKind': 'display_capture',
             'inputSettings': {
                 },
             'skip': (sys.platform != 'darwin')
