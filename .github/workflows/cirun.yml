@@ -339,11 +339,12 @@ jobs:
         run: |
           set +e
           python3 cirun/firsttime.py
+          ret=$?
 
           sleep 2
-          killall -SIGINT OBS
+          killall -SIGINT OBS &> /dev/null
           mv $HOME/'Library/Application Support/obs-studio/logs' .
-          exit 0
+          exit $ret
 
       - name: 'Gather coverage data'
         if: always()
