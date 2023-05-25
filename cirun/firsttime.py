@@ -17,8 +17,13 @@ def _location_width(t):
     return t.location.x1 - t.location.x0
 
 def _app_permissions_macos():
+    sleep(3)
     util.take_screenshot()
     util.wait_text('Review App Permissions', timeout=45)
+
+    # Sometimes `wait_text` returns while the dialog is still appearing and it's transparent. Wait more time.
+    sleep(5)
+    u.capture()
 
     t_camera_desc = u.find_text('This permission is needed in order to capture content from a webcam or capture card.')
     t_microphone_desc = u.find_text('OBS requires this permission if you want to capture your microphone.')
