@@ -136,6 +136,7 @@ class OBSSourceTest(obstest.OBSTest):
                         util.take_screenshot()
 
         with self.subTest(msg='exit and start again'):
+            cl.base_client.ws.close()
             self.assertTrue(obstest._is_obs_running())
             self.obs.term()
             self.assertFalse(obstest._is_obs_running())
@@ -150,6 +151,7 @@ class OBSSourceTest(obstest.OBSTest):
                     cl.send('RemoveScene', {'sceneName': sceneName})
                     scenes.remove(sceneName)
             util.take_screenshot()
+            cl.base_client.ws.close()
 
 
 if __name__ == '__main__':
