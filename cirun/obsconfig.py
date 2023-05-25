@@ -71,13 +71,13 @@ class OBSConfig:
         self['General']['FirstRun'] = 'true'
 
     def enable_websocket(self):
-        config = self.get_global()
-        config['OBSWebSocket']['FirstLoad'] = 'false'
-        config['OBSWebSocket']['ServerEnabled'] = 'true'
-        config['OBSWebSocket']['ServerPort'] = '4455'
-        config['OBSWebSocket']['AlertsEnabled'] = 'false'
-        config['OBSWebSocket']['AuthRequired'] = 'true'
-        config['OBSWebSocket']['ServerPassword'] = _generate_password()
+        config_obsws = self['OBSWebSocket']
+        config_obsws['FirstLoad'] = 'false'
+        config_obsws['ServerEnabled'] = 'true'
+        config_obsws['ServerPort'] = '4455'
+        config_obsws['AlertsEnabled'] = 'false'
+        config_obsws['AuthRequired'] = 'true'
+        config_obsws['ServerPassword'] = _generate_password()
         self.save_global()
 
     def get_profile(self, name=None):
