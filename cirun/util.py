@@ -98,5 +98,8 @@ def take_screenshot():
     global _screenshot_index
     sleep(1)
     u.capture()
-    u.screenshot.save(f'{_screenshot_prefix}{_screenshot_index:02d}.png')
+    name = f'{_screenshot_prefix}{_screenshot_index:02d}.png'
+    print(f'Info: Saving screenshot to {name}')
+    sys.stdout.flush()
+    u.screenshot.save(name)
     _screenshot_index += 1
