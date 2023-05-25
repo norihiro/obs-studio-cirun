@@ -93,11 +93,12 @@ def set_screenshot_prefix(name):
     os.makedirs(os.path.dirname(name), exist_ok=True)
 
 
-def take_screenshot():
+def take_screenshot(capture=True):
     global _screenshot_prefix
     global _screenshot_index
-    sleep(1)
-    u.capture()
+    if capture or not u.screenshot:
+        sleep(1)
+        u.capture()
     name = f'{_screenshot_prefix}{_screenshot_index:02d}.png'
     print(f'Info: Saving screenshot to {name}')
     sys.stdout.flush()
