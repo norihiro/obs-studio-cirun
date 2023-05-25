@@ -197,8 +197,8 @@ jobs:
             --exclude '*/obs-outputs/librtmp/*' \
             --exclude '*/rnnoise/src/*' \
             -q \
-            -c -d . -o lcov.info
-          genhtml -q lcov.info -o ../coverage/
+            -c -d . -o ../lcov.info
+          genhtml -q ../lcov.info -o ../coverage/
 
       - name: 'Gather log files'
         if: always()
@@ -217,6 +217,7 @@ jobs:
           CIRUN_DEPLOY_SSHKEY: ${{ secrets.CIRUN_DEPLOY_SSHKEY }}
           CIRUN_DEPLOY_HOSTKEY: ${{ secrets.CIRUN_DEPLOY_HOSTKEY }}
           CIRUN_DEPLOY_TARGET: ${{ secrets.CIRUN_DEPLOY_TARGET }}
+          RUNNER_OS: ${{ runner.os }}
         run: |
           set +x
           mkdir -m 700 -p ~/.ssh
@@ -224,7 +225,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-          rsync -a logs config-obs-studio coverage screenshot recording "${CIRUN_DEPLOY_TARGET}"
+          rsync -a logs config-obs-studio lcov.info coverage screenshot recording "${CIRUN_DEPLOY_TARGET}/${RUNNER_OS}/"
 
       - name: 'Upload results'
         if: always()
@@ -381,6 +382,7 @@ jobs:
           CIRUN_DEPLOY_SSHKEY: ${{ secrets.CIRUN_DEPLOY_SSHKEY }}
           CIRUN_DEPLOY_HOSTKEY: ${{ secrets.CIRUN_DEPLOY_HOSTKEY }}
           CIRUN_DEPLOY_TARGET: ${{ secrets.CIRUN_DEPLOY_TARGET }}
+          RUNNER_OS: ${{ runner.os }}
         run: |
           set +x
           mkdir -m 700 -p ~/.ssh
@@ -388,7 +390,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-          rsync -a logs screenshot lcov.info coverage "${CIRUN_DEPLOY_TARGET}/macos/"
+          rsync -a logs screenshot lcov.info coverage "${CIRUN_DEPLOY_TARGET}/${RUNNER_OS}/"
 
       - name: Upload
         if: always()
