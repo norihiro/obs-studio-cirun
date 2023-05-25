@@ -2,3 +2,4 @@ pyautogui
 editdistance
 pytesseract
 obsws-python
+psutil
