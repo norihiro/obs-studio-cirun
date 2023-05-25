@@ -90,13 +90,6 @@ sources = [
 background_source = sources[0]['sceneName']
 
 
-def _mouse_move_around_preview():
-    geometry = util.current_window_geometry()
-    x = int(random.uniform(geometry[0] + 10, (geometry[0] * 2 + geometry[2] * 1) / 3))
-    y = int(random.uniform(geometry[1] + 50, (geometry[1] * 3 + geometry[3] * 2) / 5))
-    pyautogui.moveTo(x, y)
-
-
 class OBSSourceTest(obstest.OBSTest):
     def test_add_remove_sources(self):
         util.set_screenshot_prefix('screenshot/test_add_remove_sources-')
@@ -133,7 +126,6 @@ class OBSSourceTest(obstest.OBSTest):
                         if 'sleep_after_creation' in source:
                             sleep(source['sleep_after_creation'])
                         util.take_screenshot()
-                _mouse_move_around_preview()
 
         with self.subTest(msg='exit and start again'):
             self.assertTrue(obstest._is_obs_running())
