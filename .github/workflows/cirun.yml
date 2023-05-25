@@ -177,6 +177,10 @@ jobs:
         run: |
           timeout 3m xvfb-run timeout -s SIGINT --preserve-status -k 30 10 obs
 
+      - name: 'Run unit tests'
+        run: |
+          timeout 30m xvfb-run python3 -m unittest discover cirun
+
       - name: 'Gather coverage data'
         if: always()
         run: |
@@ -344,6 +348,10 @@ jobs:
           killall -SIGINT OBS
           mv $HOME/'Library/Application Support/obs-studio/logs' .
           exit 0
+
+      - name: 'Run unit tests'
+        run: |
+          python3 -m unittest discover cirun
 
       - name: 'Gather coverage data'
         if: always()
