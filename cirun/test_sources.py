@@ -150,6 +150,8 @@ class OBSSourceTest(obstest.OBSTest):
             if 'skip' in source and source['skip']:
                 continue
             with self.subTest(inputKind=source['inputKind']):
+                if source['inputKind'] not in input_kinds:
+                    self.skipTest(f'The source type {source["inputKind"]} is not available.')
                 sceneName = source['sceneName']
                 if not sceneName in scenes:
                     cl.send('CreateScene', {'sceneName': sceneName})
