@@ -7,6 +7,10 @@ import pyautogui
 import obstest
 import util
 
+try:
+    import ffmpeg_gen
+except:
+    ffmpeg_gen = None
 
 sources = [
         {
@@ -135,6 +139,7 @@ sources = [
             'sceneName': 'Media',
             'inputKind': 'ffmpeg_source',
             'inputSettings': {
+                'local_file': ffmpeg_gen.lavfi_testsrc2() if ffmpeg_gen else '',
                 },
             },
         {
