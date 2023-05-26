@@ -130,6 +130,20 @@ sources = [
                 },
             'skip': (sys.platform != 'darwin')
             },
+        {
+            'inputName': 'media',
+            'sceneName': 'Media',
+            'inputKind': 'ffmpeg_source',
+            'inputSettings': {
+                },
+            },
+        {
+            'inputName': 'vlc',
+            'sceneName': 'VLC',
+            'inputKind': 'vlc_source',
+            'inputSettings': {
+                },
+            },
         ]
 
 background_source = sources[0]['sceneName']
