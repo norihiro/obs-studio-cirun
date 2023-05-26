@@ -193,6 +193,16 @@ class OBSSourceTest(obstest.OBSTest):
                             sleep(source['sleep_after_creation'])
                         util.take_screenshot()
 
+        with self.subTest(msg='open setting dialogs'):
+            for source in sources:
+                if 'skip' in source and source['skip']:
+                    continue
+                if source['inputKind'] not in input_kinds:
+                    continue
+                cl.send('OpenInputPropertiesDialog', {'inputName': source['inputName']})
+                util.take_screenshot()
+                pyautogui.hotkey('esc')
+
         with self.subTest(msg='exit and start again'):
             cl.base_client.ws.close()
             self.assertTrue(obstest._is_obs_running())
