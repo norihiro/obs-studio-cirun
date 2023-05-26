@@ -78,6 +78,43 @@ sources = [
             'skip': (sys.platform != 'linux')
             },
         {
+            'inputName': 'alsa input',
+            'sceneName': 'ALSA Input',
+            'inputKind': 'alsa_input_capture',
+            'inputSettings': {
+                },
+            'update_settings': [
+                {
+                    'rate': 32000
+                    },
+                ],
+            'skip': (sys.platform != 'linux')
+            },
+        {
+            'inputName': 'pa input',
+            'sceneName': 'PA Input',
+            'inputKind': 'pulse_input_capture',
+            'inputSettings': {
+                },
+            'skip': (sys.platform != 'linux')
+            },
+        {
+            'inputName': 'pa output',
+            'sceneName': 'PA Output',
+            'inputKind': 'pulse_output_capture',
+            'inputSettings': {
+                },
+            'skip': (sys.platform != 'linux')
+            },
+        {
+            'inputName': 'v4l2',
+            'sceneName': 'V4L2',
+            'inputKind': 'v4l2_input',
+            'inputSettings': {
+                },
+            'skip': (sys.platform != 'linux')
+            },
+        {
             'inputName': 'screen',
             'sceneName': 'Screen Capture',
             'inputKind': 'screen_capture',
