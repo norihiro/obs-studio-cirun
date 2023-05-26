@@ -28,9 +28,19 @@ class OBSExec:
         sleep(5)
 
     def term(self):
-        pyautogui.hotkey('ctrl', 'q')
         self.config.clear_cache()
-        sleep(4)
+
+        if sys.platform != 'darwin':
+            pyautogui.hotkey('ctrl', 'q')
+            try:
+                self.proc_obs.communicate(timeout=10)
+                return
+            except subprocess.TimeoutExpired:
+                print('Warning: Failed to terminate obs using the hotkey. Trying another method...')
+        else:
+            pyautogui.hotkey('command', 'q')
+            sleep(4)
+
         if sys.platform == 'linux':
             self.proc_obs.send_signal(subprocess.signal.SIGINT)
             try:
