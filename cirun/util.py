@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 from time import sleep
+import pyautogui
 from untriseptium import Untriseptium
 
 
@@ -77,6 +78,25 @@ def ocr_topwindow(mode=None, length=0, ratio=-1):
         geometry = (min(geometry[2] - length, geometry[0]), geometry[1], geometry[2], geometry[3])
     elif mode=='bottom':
         geometry = (geometry[0], min(geometry[3] - length, geometry[1]), geometry[2], geometry[3])
+    u.ocr(crop=geometry)
+
+
+def ocr_screen(mode=None, length=0, ratio=-1):
+    sleep(0.1)
+    u.capture()
+    screen_size = pyautogui.size()
+    if ratio > 0 and (mode=='left' or mode=='right'):
+        length = int(screen_size[0] * ratio)
+    elif ratio > 0 and (mode=='top' or mode=='bottom'):
+        length = int(screen_size[1] * ratio)
+    if mode=='left':
+        geometry = (0, 0, min(0 + length, screen_size[0]), screen_size[1])
+    elif mode=='top':
+        geometry = (0, 0, screen_size[0], min(length, screen_size[1]))
+    elif mode=='right':
+        geometry = (min(screen_size[0] - length, 0), 0, screen_size[0], screen_size[1])
+    elif mode=='bottom':
+        geometry = (0, min(screen_size[1] - length, 0), screen_size[0], screen_size[1])
     u.ocr(crop=geometry)
 
 
