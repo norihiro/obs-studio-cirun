@@ -99,8 +99,44 @@ def take_screenshot(capture=True):
     if capture or not u.screenshot:
         sleep(1)
         u.capture()
+        macos_check_fault(capture=False)
     name = f'{_screenshot_prefix}{_screenshot_index:02d}.png'
     print(f'Info: Saving screenshot to {name}')
     sys.stdout.flush()
     u.screenshot.save(name)
     _screenshot_index += 1
+
+
+def _macos_check_fault_report():
+    click_verbose(u.find_text('Report...'))
+    sleep(3)
+
+    # Expect to have buttons `Show Details`, `Don't Send`, `Send to Apple`
+    u.capture()
+    take_screenshot(capture=False)
+    cx = u.screenshot.width / 2
+    u.ocr(crop=(cx-256, 0, cx+256, u.screenshot.height))
+    click_verbose(u.find_text('Show Details'))
+    sleep(3)
+
+    # TODO: Navigate further
+    u.capture()
+
+
+def macos_check_fault(capture=True):
+    if sys.platform != 'darwin':
+        return
+
+    if capture or not u.screenshot:
+        u.capture()
+
+    backup = u.ocrdata
+    cx = u.screenshot.width / 2
+    u.ocr(crop=(cx-128, 0, cx+128, u.screenshot.height))
+    tt = u.find_texts('OBS Studio quit unexpectedly.')
+    if len(tt) == 0 or tt[0].confidence < 0.9:
+        u.ocrdata = backup
+        return
+
+    _macos_check_fault_report()
+    raise Exception(tt[0].text)
