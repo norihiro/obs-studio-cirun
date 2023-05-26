@@ -64,4 +64,15 @@ class OBSExec:
     def get_obsws(self):
         global_cfg = self.config.get_global()
         obsws_pw = global_cfg['OBSWebSocket']['ServerPassword']
-        return obsws_python.ReqClient(host='localhost', port=4455, password=obsws_pw)
+        n_retry = 5
+        err = None
+        while n_retry > 0:
+            try:
+                return obsws_python.ReqClient(host='localhost', port=4455, password=obsws_pw)
+            except ConnectionRefusedError as e:
+                err = e
+                if self.proc_obs.poll() == None:
+                    sleep(1)
+                    print(f'Info: Failed to connect to obs-websocket {e=}. Retrying...')
+            n_retry -= 1
+        raise err
