@@ -107,6 +107,14 @@ sources = [
             'skip': (sys.platform != 'linux')
             },
         {
+            'inputName': 'v4l2',
+            'sceneName': 'V4L2',
+            'inputKind': 'v4l2_input',
+            'inputSettings': {
+                },
+            'skip': (sys.platform != 'linux')
+            },
+        {
             'inputName': 'screen',
             'sceneName': 'Screen Capture',
             'inputKind': 'screen_capture',
