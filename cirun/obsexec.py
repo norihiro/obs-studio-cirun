@@ -47,6 +47,7 @@ class OBSExec:
                 util.u.ocr(crop=(0, 0, 216, 40))
                 util.click_verbose(util.u.find_text('OBS Studio'))
                 util.u.ocr(crop=(0, 0, 480, 540))
+                util.take_screenshot()
                 util.click_verbose(util.u.find_text('Exit'))
             except:
                 print('Error: failed to open menu to exit')
