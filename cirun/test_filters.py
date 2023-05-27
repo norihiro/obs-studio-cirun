@@ -6,6 +6,7 @@ import unittest
 import pyautogui
 import obstest
 import util
+import ffmpeg_gen
 
 
 filters = [
@@ -82,6 +83,15 @@ filters = [
             'sleep_after_update': 2,
         },
         {
+            'sourceName': 'async delay',
+            'filterName': 'async-dly',
+            'filterKind': 'async_delay_filter',
+            'filterSettings': {
+                'delay_ms': 400
+            },
+            'type': 'ASYNC_VIDEO',
+        },
+        {
             'sourceName': 'scale',
             'filterName': 'scale',
             'filterKind': 'scale_filter',
@@ -120,6 +130,23 @@ def _create_scene_with_color(cl, scene_name, source_name, color):
         },
     })
 
+def _create_scene_with_media(cl, scene_name, source_name):
+    fname = ffmpeg_gen.lavfi_testsrc2()
+    if not fname:
+        return None
+    if not source_name:
+        source_name = 'media-' + scene_name
+    cl.send('CreateScene', {'sceneName': scene_name})
+    cl.send('CreateInput', {
+        'inputName': source_name,
+        'sceneName': scene_name,
+        'inputKind': 'ffmpeg_source',
+        'inputSettings': {
+            'local_file': ffmpeg_gen.lavfi_testsrc2(),
+        },
+    })
+    return True
+
 class OBSFilterTest(obstest.OBSTest):
     def test_add_filters(self):
         util.set_screenshot_prefix('screenshot/test_add_filters-')
@@ -132,10 +159,15 @@ class OBSFilterTest(obstest.OBSTest):
                 continue
             source_name = f['sourceName']
             scene_name = 'Scene ' + source_name
-            _create_scene_with_color(cl, scene_name, source_name, int(random.uniform(0xFF000000, 0xFFFFFFFF)))
-            cl.send('SetCurrentProgramScene', {'sceneName': scene_name})
 
             with self.subTest(filterKind=f['filterKind']):
+                if 'type' in f and f['type'] == 'ASYNC_VIDEO':
+                    if not _create_scene_with_media(cl, scene_name, source_name):
+                        self.skipTest('An async video source is unavailable.')
+                else:
+                    _create_scene_with_color(cl, scene_name, source_name, int(random.uniform(0xFF000000, 0xFFFFFFFF)))
+                cl.send('SetCurrentProgramScene', {'sceneName': scene_name})
+
                 cl.send('CreateSourceFilter', f)
                 if 'sleep_after_creation' in f:
                     sleep(f['sleep_after_creation'])
