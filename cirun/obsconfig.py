@@ -41,6 +41,23 @@ class OBSConfig:
         shutil.rmtree(name, ignore_errors=True)
         shutil.copytree(self.path + '/', name, symlinks=True)
 
+    def move_logs(self):
+        try:
+            path_logs = self.path + '/logs/'
+            for f in os.listdir(path_logs):
+                try:
+                    shutil.move(path_logs + f, './logs/')
+                except FileNotFoundError:
+                    break
+                except:
+                    pass
+        except:
+            pass
+
+    def _clean_config_dir(self):
+        self.move_logs()
+        shutil.rmtree(self.path, ignore_errors=True)
+
     def clear_cache(self):
         self._global = None
 
@@ -92,7 +109,7 @@ class OBSConfigClean(OBSConfig):
     '''
     def __init__(self):
         OBSConfig.__init__(self)
-        shutil.rmtree(self.path, ignore_errors=True)
+        self._clean_config_dir()
 
 
 class OBSConfigCopyFromSaved(OBSConfig):
@@ -101,7 +118,7 @@ class OBSConfigCopyFromSaved(OBSConfig):
     '''
     def __init__(self, name):
         OBSConfig.__init__(self)
-        shutil.rmtree(self.path, ignore_errors=True)
+        self._clean_config_dir()
         os.makedirs(os.path.dirname(self.path), mode=0o755, exist_ok=True)
         shutil.copytree(name + '/', self.path, symlinks=True)
 

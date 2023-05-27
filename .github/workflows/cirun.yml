@@ -168,6 +168,7 @@ jobs:
           mkdir -p $artifact/{logs,screenshot}
           ln -s $artifact artifact
           ln -s $artifact/screenshot .
+          ln -s $artifact/logs .
 
       - name: 'Cache test source files (OS independent)'
         uses: actions/cache@v3
@@ -220,7 +221,7 @@ jobs:
       - name: 'Gather log files'
         if: always()
         run: |
-          mv $HOME/.config/obs-studio/logs artifact/
+          mv -f $HOME/.config/obs-studio/logs/* logs/
           mkdir -p artifact/recording
           mv $HOME/*.mp4 artifact/recording/ || true
           for i in desktop*.mkv; do
@@ -370,6 +371,7 @@ jobs:
           mkdir -p $artifact/{logs,screenshot}
           ln -s $artifact artifact
           ln -s $artifact/screenshot .
+          ln -s $artifact/logs .
 
       - name: 'Cache test source files (OS independent)'
         uses: actions/cache@v3
@@ -385,7 +387,7 @@ jobs:
 
           sleep 2
           killall -SIGINT OBS &> /dev/null
-          mv $HOME/'Library/Application Support/obs-studio/logs/*' artifact/logs/
+          mv -f $HOME/'Library/Application Support/obs-studio/logs/*' logs/
           exit $ret
 
       - name: 'Run unit tests'
@@ -412,6 +414,11 @@ jobs:
             -q \
             -c -d . -o ../artifact/lcov.info
           genhtml -q ../artifact/lcov.info -o ../artifact/coverage/
+
+      - name: 'Gather log files'
+        if: always()
+        run: |
+          mv -f $HOME/'Library/Application Support/obs-studio/logs'/* logs/
 
       - name: 'Upload log files'
         if: always()
