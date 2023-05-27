@@ -6,7 +6,9 @@ The release format, such as file names and content-types, assumes the one made b
 import json
 import os
 import re
+import subprocess
 import urllib.request
+import tempfile
 import zipfile
 
 
@@ -53,6 +55,12 @@ def download_plugin(repo_name, file_re):
             continue
         url = a['browser_download_url']
 
+    if not url:
+        print('Error: no matching package is found. Available packages are as below.')
+        for a in latest['assets']:
+            print('  ' + a['name'])
+        raise ValueError(f'No matching package for {file_re}')
+
     print(f'Info: Downloading "{name}"...')
 
     with _gh_urlopen(url) as res:
@@ -74,14 +82,41 @@ def install_plugin_macos_zip(filename):
         z.extractall(dirname)
 
 
+def install_plugin_macos_pkg(filename):
+    '''
+    Install a PKG plugin for macOS.
+    filename - file name on this system.
+    '''
+    dirname = os.environ['HOME'] + '/Library/Application Support/obs-studio/plugins/'
+    os.makedirs(dirname, exist_ok=True)
+
+    # FIXME: The command 'sudo installer -pkg filename -target $HOME' cannot install to home but root.
+    with tempfile.NamedTemporaryFile(suffix='.cpio') as t:
+        with subprocess.Popen(['7z', 'x', '-so', filename], stdout=t.file) as p:
+            ret = p.wait()
+            if ret != 0:
+                raise Exception(f'Failed to extract the file {filename} with return code {ret}.')
+
+        t.file.close()
+
+        with subprocess.Popen(['7z', 'x', '-o'+os.environ['HOME'], t.name]) as p:
+            ret = p.wait()
+            if ret != 0:
+                raise Exception(f'Failed to extract the wrapped package in {filename} with return code {ret}.')
+
+
 def download_install_plugin_macos(repo_name):
     '''
     Download and install the latest plugin.
     repo_name - owner/repo on github.com to download and install.
     '''
-    # Assumes the package names are the usual norihiro's convention.
-    filename = download_plugin(repo_name, '.*-macos(-universal|-x86_64|).zip')
-    install_plugin_macos_zip(filename)
+    if repo_name == 'glikely/obs-ptz':
+        filename = download_plugin(repo_name, '.*-macos-(universal|x86_64).pkg')
+        install_plugin_macos_pkg(filename)
+    else:
+        # Assumes the package names are the usual norihiro's convention.
+        filename = download_plugin(repo_name, '.*-macos(-universal|-x86_64|).zip')
+        install_plugin_macos_zip(filename)
 
 
 if __name__ == '__main__':
