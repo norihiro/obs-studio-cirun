@@ -199,6 +199,8 @@ class OBSSourceTest(obstest.OBSTest):
                 util.take_screenshot()
                 pyautogui.hotkey('esc')
 
+        util.take_screenshot()
+
         with self.subTest(msg='exit and start again'):
             cl.base_client.ws.close()
             self.assertTrue(obstest._is_obs_running())
