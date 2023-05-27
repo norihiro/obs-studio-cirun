@@ -126,31 +126,6 @@ sources = [
                     ],
                 },
             },
-        {
-            'inputName': 'browser',
-            'sceneName': 'Scene Browser',
-            'inputKind': 'browser_source',
-            'inputSettings': {
-                'url': 'https://www.youtube.com/watch?v=ghuB0ozPttI&list=UULFp_UXGmCCIRaX5pyFljICoQ',
-                'reroute_audio': False,
-                },
-            'sleep_after_creation': 5,
-            'update_settings': [
-                {
-                    'reroute_audio': True
-                    },
-                {
-                    'reroute_audio': False
-                    },
-                ]
-            },
-        {
-            'inputName': 'xshm',
-            'sceneName': 'Scene Desktop',
-            'inputKind': 'xshm_input',
-            'inputSettings': {
-                },
-            },
         ]
 
 background_source = sources[0]['sceneName']
@@ -187,72 +162,11 @@ for source in sources:
     sleep(0.2); pyautogui.hotkey('esc')
     sleep(0.2); pyautogui.hotkey('esc')
 
-flg_cleanup = False
-if flg_cleanup:
-    for source in sources:
-        sceneName = source['sceneName']
-        if sceneName in scenes:
-            cl.send('RemoveScene', {'sceneName': sceneName})
-            scenes.remove(sceneName)
-
-util.set_screenshot_prefix('screenshot/02-projectors-')
-# Open projectors
-def _close_projector():
-    sleep(1)
-    pyautogui.rightClick(util.current_window_center())
-    sleep(0.5)
-    pyautogui.hotkey('up')
-    sleep(0.5)
-    pyautogui.hotkey('enter')
-
-cl.send('OpenSourceProjector', {'sourceName': background_source})
-_close_projector()
-cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW', 'monitorIndex': 0})
-## click `Always On Top`
-util.take_screenshot()
-pyautogui.rightClick()
-sleep(0.2)
-pyautogui.hotkey('up')
-pyautogui.hotkey('up')
-sleep(1.0)
-pyautogui.hotkey('enter')
-## click a source to make transition
-pyautogui.click((int(screen_size[0] * 0.6), int(screen_size[1] * 0.6)))
-sleep(0.1)
-pyautogui.doubleClick((int(screen_size[0] * 0.3), int(screen_size[1] * 0.6)))
-sleep(0.2)
-util.take_screenshot()
-_close_projector()
-
-cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM'})
-util.take_screenshot()
-_close_projector()
-
-cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW'})
-util.take_screenshot()
-_close_projector()
-
 # Switch to the background scene
 cl.send('SetCurrentPreviewScene', {'sceneName': background_source})
 cl.send('TriggerStudioModeTransition')
 cl.send('SetCurrentPreviewScene', {'sceneName': background_source})
 sleep(1)
-
-# Upload the log file
-print('Uploading the log file...')
-util.set_screenshot_prefix('screenshot/02-upload-log-')
-util.take_screenshot()
-util.click_verbose(u.find_text('Help'))
-util.take_screenshot()
-util.ocr_topwindow(mode='top', length=500)
-util.click_verbose(u.find_text('Log Files'))
-util.take_screenshot()
-util.ocr_topwindow(mode='top', length=500)
-util.click_verbose(u.find_text('Upload Current Log File'))
-util.take_screenshot()
-sleep(5)
-pyautogui.hotkey('enter')
-util.take_screenshot()
 
 # Terminate OBS
 cl.send('StopRecord')
