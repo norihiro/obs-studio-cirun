@@ -139,7 +139,7 @@ jobs:
           sudo apt update
           sudo apt install -y tesseract-ocr tesseract-ocr-eng
 
-          git clone https://github.com/norihiro/untriseptium.git
+          git clone --depth=1 https://github.com/norihiro/untriseptium.git
           (cd untriseptium && pip3 install -U ./)
 
           sudo tee -a /etc/nginx/nginx.conf <<-EOF
@@ -344,7 +344,7 @@ jobs:
           brew install tesseract
           pip3 install -U -r cirun/requirements.txt
           pip3 install -U Pillow
-          git clone https://github.com/norihiro/untriseptium.git
+          git clone --depth=1 https://github.com/norihiro/untriseptium.git
           (cd untriseptium && pip3 install -U ./)
 
       - name: 'Run first time'
