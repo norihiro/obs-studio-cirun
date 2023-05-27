@@ -6,9 +6,13 @@ import subprocess
 import os
 
 
-_p = subprocess.Popen(['ffmpeg', '-loglevel', 'error', '-version'])
-if _p.wait() != 0:
-    raise Exception('cannot run ffmpeg')
+_has_ffmpeg = False
+try:
+    _p = subprocess.Popen(['ffmpeg', '-loglevel', 'error', '-version'])
+    if _p.wait() == 0:
+        _has_ffmpeg = True
+except:
+    pass
 
 
 default_ext='flv'
@@ -28,6 +32,9 @@ def lavfi_testsrc2(ext=None):
     fname = os.path.abspath('lavfi_testsrc2.' + ext)
     if _is_exist(fname):
         return fname
+
+    if not _has_ffmpeg:
+        return None
 
     p = subprocess.Popen([
         'ffmpeg',
