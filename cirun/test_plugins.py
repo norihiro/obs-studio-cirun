@@ -37,6 +37,24 @@ class OBSPluginTest(obstest.OBSTest):
 
         sleep(1)
 
+    def test_async_audio_source(self):
+        obsplugin.download_install_plugin_macos('norihiro/obs-asynchronous-audio-source')
+
+        self.obs.run()
+        cl = self.obs.get_obsws()
+
+        name = 'async-audio'
+        cl.send('CreateInput', {
+            'inputName': name,
+            'sceneName': 'Scene',
+            'inputKind': 'net.nagater.obs.' + 'asynchronous-audio-source',
+            'inputSettings': {
+                'rate': 32000, # also cover libobs resampler
+            },
+        })
+
+        sleep(1)
+
 
 # So far, This test works for macOS.
 # TODO: Also implement for Ubuntu 22.04.
