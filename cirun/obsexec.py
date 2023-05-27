@@ -112,18 +112,23 @@ class OBSExec:
     def get_obsws(self):
         global_cfg = self.config.get_global()
         obsws_pw = global_cfg['OBSWebSocket']['ServerPassword']
-        n_retry = 5
+        n_retry = 10
         err = None
         while n_retry > 0:
             n_retry -= 1
             try:
-                return obsws_python.ReqClient(host='localhost', port=4455, password=obsws_pw)
+                ret = obsws_python.ReqClient(host='localhost', port=4455, password=obsws_pw)
+                if sys.platform == 'linux' and n_retry != 9:
+                    print(f'Info: Succeeded to connect to obs-websocket after {8 - n_retry} failed attempt(s).')
+                    sys.stdout.flush()
+                    os.system('ss -tnlp')
+                return ret
             except ConnectionRefusedError as e:
                 err = e
                 if self.proc_obs and self.proc_obs.poll() == None:
-                    sleep(1)
+                    sleep(3)
                     print(f'Info: Failed to connect to obs-websocket {e=}. {n_retry} more attempt(s).')
+                    sys.stdout.flush()
                     if sys.platform == 'linux':
                         os.system('ss -tnlp || sudo apt install -y iproute2 && ss -tnlp')
-                    sys.stdout.flush()
         raise err
