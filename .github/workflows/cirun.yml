@@ -262,7 +262,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sha="$(gh api /repos/obsproject/obs-studio/commits | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
-          patchhash=$(git log -1 --format='%h' patch/)
+          patchHash=$(git log -1 --format='%h' patch/)
           echo "obsHashAPI=$sha" >> $GITHUB_OUTPUT
           echo "patchHash=$patchHash" >> $GITHUB_OUTPUT
 
