@@ -196,6 +196,8 @@ jobs:
           timeout 3m xvfb-run timeout -s SIGINT --preserve-status -k 30 10 obs
 
       - name: 'Run unit tests'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           timeout 30m xvfb-run python3 -m unittest discover cirun
 
@@ -391,6 +393,8 @@ jobs:
           exit $ret
 
       - name: 'Run unit tests'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 -m unittest discover cirun
 
