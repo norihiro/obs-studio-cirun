@@ -7,6 +7,9 @@ on:
     - cron: '19 13 * * *'
   workflow_dispatch:
 
+env:
+  CIRUN_REFNAME: ${{ github.ref_name }}
+
 jobs:
   linux_run:
     runs-on: 'ubuntu-22.04'
@@ -157,6 +160,15 @@ jobs:
           }
           EOF
 
+      - name: 'Create artifact directory'
+        env:
+          obsHash: ${{ steps.setup.outputs.obsHash }}
+        run: |
+          artifact=".artifact/$CIRUN_REFNAME/${obsHash}/${RUNNER_OS}/"
+          mkdir -p $artifact/{logs,screenshot}
+          ln -s $artifact artifact
+          ln -s $artifact/screenshot .
+
       - name: 'Run just version and help'
         run: |
           obs --version
@@ -164,7 +176,6 @@ jobs:
 
       - name: 'Run first time'
         run: |
-          mkdir screenshot
           timeout 3m xvfb-run cirun/firsttime.py
 
       - name: 'Run second time'
@@ -197,19 +208,19 @@ jobs:
             --exclude '*/obs-outputs/librtmp/*' \
             --exclude '*/rnnoise/src/*' \
             -q \
-            -c -d . -o ../lcov.info
-          genhtml -q ../lcov.info -o ../coverage/
+            -c -d . -o ../artifact/lcov.info
+          genhtml -q ../artifact/lcov.info -o ../artifact/coverage/
 
       - name: 'Gather log files'
         if: always()
         run: |
-          mv $HOME/.config/obs-studio/logs .
-          mkdir -p recording
-          mv $HOME/*.mp4 recording/ || true
+          mv $HOME/.config/obs-studio/logs artifact/
+          mkdir -p artifact/recording
+          mv $HOME/*.mp4 artifact/recording/ || true
           for i in desktop*.mkv; do
-            ffmpeg -loglevel error -i $i -c copy recording/${i/.mkv/.mp4} || true
+            ffmpeg -loglevel error -i $i -c copy artifact/recording/${i/.mkv/.mp4} || true
           done
-          rsync -a --exclude obs-browser $HOME/.config/obs-studio/ config-obs-studio/
+          rsync -a --exclude obs-browser $HOME/.config/obs-studio/ artifact/config-obs-studio/
 
       - name: 'Upload log files'
         if: always()
@@ -225,7 +236,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-          rsync -a logs config-obs-studio lcov.info coverage screenshot recording "${CIRUN_DEPLOY_TARGET}/${RUNNER_OS}/"
+          rsync -a .artifact/* "${CIRUN_DEPLOY_TARGET}/"
 
       - name: 'Upload results'
         if: always()
@@ -233,9 +244,7 @@ jobs:
         with:
           name: 'obs-studio-cirun-${{ steps.setup.outputs.obsHash }}'
           path: |
-            screenshot/
-            logs/
-            coverage/
+            .artifact/*
 
   macos_run:
     runs-on: 'macos-12'
@@ -347,6 +356,15 @@ jobs:
           git clone --depth=1 https://github.com/norihiro/untriseptium.git
           (cd untriseptium && pip3 install -U ./)
 
+      - name: 'Create artifact directory'
+        env:
+          obsHash: ${{ steps.setup.outputs.obsHash }}
+        run: |
+          artifact=".artifact/$CIRUN_REFNAME/${obsHash}/${RUNNER_OS}/"
+          mkdir -p $artifact/{logs,screenshot}
+          ln -s $artifact artifact
+          ln -s $artifact/screenshot .
+
       - name: 'Run first time'
         run: |
           set +e
@@ -355,7 +373,7 @@ jobs:
 
           sleep 2
           killall -SIGINT OBS &> /dev/null
-          mv $HOME/'Library/Application Support/obs-studio/logs' .
+          mv $HOME/'Library/Application Support/obs-studio/logs/*' artifact/logs/
           exit $ret
 
       - name: 'Run unit tests'
@@ -380,8 +398,8 @@ jobs:
             --exclude '*/obs-outputs/librtmp/*' \
             --exclude '*/rnnoise/src/*' \
             -q \
-            -c -d . -o ../lcov.info
-          genhtml -q ../lcov.info -o ../coverage/
+            -c -d . -o ../artifact/lcov.info
+          genhtml -q ../artifact/lcov.info -o ../artifact/coverage/
 
       - name: 'Upload log files'
         if: always()
@@ -397,7 +415,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-          rsync -a logs screenshot lcov.info coverage "${CIRUN_DEPLOY_TARGET}/${RUNNER_OS}/"
+          rsync -a .artifact/* "${CIRUN_DEPLOY_TARGET}/"
 
       - name: Upload
         if: always()
@@ -405,5 +423,4 @@ jobs:
         with:
           name: 'obs-studio-cirun-macos-${{ steps.setup.outputs.obsHash }}'
           path: |
-            a.png
-            logs/
+            .artifact/*
