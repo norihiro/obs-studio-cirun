@@ -24,34 +24,57 @@ class OBSExec:
         if sys.platform == 'linux':
             self.proc_obs = subprocess.Popen(['obs'])
         elif sys.platform == 'darwin':
-            os.system('open obs-studio/build_x86_64/UI/RelWithDebInfo/OBS.app')
+            self.proc_obs = subprocess.Popen(['open', '-W', 'obs-studio/build_x86_64/UI/RelWithDebInfo/OBS.app'])
         sleep(5)
+
+    def _is_terminated(self, timeout=10):
+        if not self.proc_obs:
+            return True
+        try:
+            self.proc_obs.communicate(timeout=timeout)
+            self.proc_obs = None
+            return True
+        except subprocess.TimeoutExpired:
+            return False
 
     def term(self):
         self.config.clear_cache()
 
         if sys.platform != 'darwin':
             pyautogui.hotkey('ctrl', 'q')
-            try:
-                self.proc_obs.communicate(timeout=10)
+            if self._is_terminated():
                 return
-            except subprocess.TimeoutExpired:
-                print('Warning: Failed to terminate obs using the hotkey. Trying another method...')
+            print('Warning: Failed to terminate obs using the hotkey. Trying another method...')
         else:
-            pyautogui.hotkey('command', 'q')
-            sleep(4)
+            for i in range(1, 6):
+                pyautogui.hotkey('command', 'w')
+                sleep(1)
+                pyautogui.hotkey('command', 'q')
+                if self._is_terminated():
+                    if i == 1:
+                        ith = '1st'
+                    elif i == 2:
+                        ith = '2nd'
+                    elif i == 3:
+                        ith = '3rd'
+                    else:
+                        ith = f'{i}th'
+                    print(f'Info: OBS was terminated by {ith} command-W hotkey.')
+                    return
+            print('Warning: Failed to terminate obs using the hotkey. Trying another method...')
 
         if sys.platform == 'linux':
             self.proc_obs.send_signal(subprocess.signal.SIGINT)
-            try:
-                self.proc_obs.communicate(timeout=20)
-            except subprocess.TimeoutExpired:
-                print('Error: failed to wait obs. SIGINT could not terminate obs.')
+            if self._is_terminated(timeout=20):
+                print('Info: obs was terminated by SIGINT.')
+                return
+            print('Error: failed to wait obs. SIGINT could not terminate obs.')
             self.proc_obs.send_signal(subprocess.signal.SIGKILL)
-            try:
-                self.proc_obs.communicate(timeout=20)
-            except subprocess.TimeoutExpired:
-                print('Error: failed to wait obs though SIGKILL was sent.')
+            if self._is_terminated(timeout=20):
+                print('Warning: obs was terminated by SIGKILL.')
+                return
+            print('Error: failed to wait obs though SIGKILL was sent.')
+
         elif sys.platform == 'darwin':
             try:
                 util.u.ocr(crop=(0, 0, 216, 40))
@@ -60,8 +83,11 @@ class OBSExec:
                 util.take_screenshot()
                 util.click_verbose(util.u.find_text('Quit OBS Studio'))
             except:
-                print('Error: failed to open menu to exit')
+                print('Warning: failed to open menu to exit')
                 util.take_screenshot()
+            if self._is_terminated():
+                return
+
             for cmd in ('killall -INT', 'killall'):
                 retry = 2
                 while retry > 0:
@@ -69,7 +95,11 @@ class OBSExec:
                     if ret != 0:
                         return
                     retry -= 1
-                    sleep(10)
+                    if self._is_terminated():
+                        print(f'Info: OBS was terminated by {cmd}')
+                        return
+
+        raise Exception('Failed to terminate obs')
 
     def get_obsws(self):
         global_cfg = self.config.get_global()
@@ -81,7 +111,7 @@ class OBSExec:
                 return obsws_python.ReqClient(host='localhost', port=4455, password=obsws_pw)
             except ConnectionRefusedError as e:
                 err = e
-                if self.proc_obs.poll() == None:
+                if self.proc_obs and self.proc_obs.poll() == None:
                     sleep(1)
                     print(f'Info: Failed to connect to obs-websocket {e=}. Retrying...')
             n_retry -= 1
