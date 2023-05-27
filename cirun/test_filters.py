@@ -70,7 +70,16 @@ filters = [
             'filterName': 'dly',
             'filterKind': 'gpu_delay',
             'filterSettings': {
+                'delay_ms': 200
             },
+            'filterSettings1': {
+                'delay_ms': 400
+            },
+            'filterSettings2': {
+                'delay_ms': 50
+            },
+            'sleep_after_creation': 2,
+            'sleep_after_update': 2,
         },
         {
             'sourceName': 'scale',
@@ -84,7 +93,14 @@ filters = [
             'filterName': 'scroll',
             'filterKind': 'scroll_filter',
             'filterSettings': {
+                'speed_x': 500,
+                'speed_y': 500
             },
+            'filterSettings1': {
+                'loop': False
+            },
+            'sleep_after_creation': 4,
+            'sleep_after_update': 4,
         },
 ]
 
@@ -99,6 +115,8 @@ def _create_scene_with_color(cl, scene_name, source_name, color):
         'inputKind': 'color_source_v3',
         'inputSettings': {
             'color': color,
+            'width': 640,
+            'height': 360,
         },
     })
 
@@ -119,8 +137,19 @@ class OBSFilterTest(obstest.OBSTest):
 
             with self.subTest(filterKind=f['filterKind']):
                 cl.send('CreateSourceFilter', f)
+                if 'sleep_after_creation' in f:
+                    sleep(f['sleep_after_creation'])
                 cl.send('GetSourceFilter', f)
                 ff.append(f)
+
+                i = 1
+                while f'filterSettings{i}' in f:
+                    d = dict(f)
+                    d['filterSettings'] = f[f'filterSettings{i}']
+                    cl.send('SetSourceFilterSettings', d)
+                    if 'sleep_after_update' in f:
+                        sleep(f['sleep_after_update'])
+                    i += 1
 
             util.take_screenshot()
 
