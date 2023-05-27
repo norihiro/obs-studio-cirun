@@ -275,9 +275,9 @@ jobs:
         id: setup0
         env:
           GH_TOKEN: ${{ github.token }}
+          patchHash: ${{ hashFiles('patch/**') }}
         run: |
           sha="$(gh api /repos/obsproject/obs-studio/commits | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
-          patchHash=$(git log -1 --format='%h' patch/)
           echo "obsHashAPI=$sha" >> $GITHUB_OUTPUT
           echo "patchHash=$patchHash" >> $GITHUB_OUTPUT
 
