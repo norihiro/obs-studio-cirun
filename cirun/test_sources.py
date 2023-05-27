@@ -15,6 +15,8 @@ sources = [
             'inputKind': 'color_source_v3',
             'inputSettings': {
                 'color': 0xff582416,
+                'width': 1280,
+                'height': 720,
                 },
             },
         {
