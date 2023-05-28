@@ -160,3 +160,24 @@ def macos_check_fault(capture=True):
 
     _macos_check_fault_report()
     raise Exception(tt[0].text)
+
+
+def ocr_mainmenu(capture=True):
+    if capture:
+        u.capture()
+
+    retry = 5
+    while retry > 0:
+        retry -= 1
+        if sys.platform != 'darwin':
+            geo = current_window_geometry()
+            u.ocr(crop=(geo[0], geo[1], geo[2], geo[1]+50))
+
+        else:
+            u.ocr(crop=(0, 0, u.screenshot.width, 40))
+
+        tt = u.find_texts('File Edit View Docks Profile Scene Collection Tools Help')
+        if tt[0].confidence > 0.8:
+            return
+
+        sleep(2)
