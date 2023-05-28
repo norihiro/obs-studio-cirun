@@ -30,9 +30,10 @@ def download_plugin(repo_name, file_re):
     if isinstance(file_re, str):
         file_re = re.compile(file_re)
 
-    with _gh_urlopen(f'https://api.github.com/repos/{repo_name}/releases/latest') as res:
-        latest = res.read()
-    latest = json.loads(latest.decode())
+    with _gh_urlopen(f'https://api.github.com/repos/{repo_name}/releases') as res:
+        releases = res.read()
+    releases = json.loads(releases.decode())
+    latest = releases[0]
 
     has_obs27 = False
     has_obs28 = False
