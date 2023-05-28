@@ -16,6 +16,34 @@ record = None
 def _location_width(t):
     return t.location.x1 - t.location.x0
 
+
+def clean_desktop():
+    '''
+    Close windows and popups already displayed at the startup on GitHub Actions.
+    '''
+    if sys.platform == 'darwin':
+        util.set_screenshot_prefix('screenshot/01-00-prepare-')
+        util.take_screenshot()
+        u.ocr(crop=(u.screenshot.width - 400, 24, u.screenshot.width, 180))
+        tt = u.find_texts('New software is ready to be installed.')
+        if len(tt) == 0 or tt[0].confidence < 0.8:
+            return
+        util.click_verbose(tt[0])
+        util.take_screenshot()
+        pyautogui.hotkey('command', 'q')
+        util.take_screenshot()
+        pyautogui.hotkey('command', 'q')
+        util.take_screenshot()
+
+    elif sys.platform == 'win32':
+        util.set_screenshot_prefix('screenshot/01-00-prepare-')
+        util.take_screenshot()
+        pyautogui.hotkey('win', 'down')
+        util.take_screenshot()
+        pyautogui.hotkey('win', 'down')
+        util.take_screenshot()
+
+
 def _app_permissions_macos():
     sleep(3)
     util.take_screenshot()
@@ -59,10 +87,10 @@ def run_firsttime():
 
     # App Permission
     if sys.platform == 'darwin':
-        util.set_screenshot_prefix('screenshot/01-00-permissions-')
+        util.set_screenshot_prefix('screenshot/01-01-permissions-')
         _app_permissions_macos()
 
-    util.set_screenshot_prefix('screenshot/01-01-autoconf-')
+    util.set_screenshot_prefix('screenshot/01-10-autoconf-')
 
     util.wait_text('Specify what you want to use the program for', timeout=5)
     util.take_screenshot()
@@ -87,7 +115,7 @@ def run_firsttime():
 
 def configure_websocket_by_ui():
     # Open obs-websocket dialog
-    util.set_screenshot_prefix('screenshot/01-10-websocket-')
+    util.set_screenshot_prefix('screenshot/01-20-websocket-')
     util.take_screenshot()
     util.ocr_topwindow(mode='top', length=100)
     util.click_verbose(u.find_text('Tools'))
@@ -130,7 +158,13 @@ def terminate_firsttime():
 if __name__ == '__main__':
     ret = 0
     try:
-        run_firsttime();
+        clean_desktop()
+    except:
+        import traceback
+        traceback.print_exc(file=sys.stdout)
+        util.take_screenshot(capture=False)
+    try:
+        run_firsttime()
         if sys.platform == 'linux':
             # TODO: Run in a separated test case
             configure_websocket_by_ui()
