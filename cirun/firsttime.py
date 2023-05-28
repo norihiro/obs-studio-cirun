@@ -51,8 +51,6 @@ def run_firsttime():
     global obs, record
     sleep(1)
 
-    util.set_screenshot_prefix('screenshot/01-firsttime-')
-
     if sys.platform != 'darwin':
         record = desktoprecord.DesktopRecord(filename='desktop-firsttime.mkv')
 
@@ -61,7 +59,10 @@ def run_firsttime():
 
     # App Permission
     if sys.platform == 'darwin':
+        util.set_screenshot_prefix('screenshot/01-00-permissions-')
         _app_permissions_macos()
+
+    util.set_screenshot_prefix('screenshot/01-01-autoconf-')
 
     util.wait_text('Specify what you want to use the program for', timeout=5)
     util.take_screenshot()
@@ -86,7 +87,7 @@ def run_firsttime():
 
 def configure_websocket_by_ui():
     # Open obs-websocket dialog
-    util.set_screenshot_prefix('screenshot/01-websocket-')
+    util.set_screenshot_prefix('screenshot/01-10-websocket-')
     util.take_screenshot()
     util.ocr_topwindow(mode='top', length=100)
     util.click_verbose(u.find_text('Tools'))
