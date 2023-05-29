@@ -1,0 +1,15 @@
+diff --git a/CI/linux/02_build_obs.sh b/CI/linux/02_build_obs.sh
+index b5cd618fb..35601ddfc 100755
+--- a/CI/linux/02_build_obs.sh
++++ b/CI/linux/02_build_obs.sh
+@@ -59,6 +59,10 @@ _configure_obs() {
+         -DLINUX_PORTABLE=${PORTABLE_BUILD:-OFF} \
+         -DENABLE_AJA=OFF \
+         -DENABLE_NEW_MPEGTS_OUTPUT=OFF \
++        -DCMAKE_INSTALL_PREFIX=/usr \
++        -DCMAKE_INSTALL_SYSCONFDIR=/etc \
++        -DCMAKE_INSTALL_LOCALSTATEDIR=/var \
++        -DCMAKE_INSTALL_LIBDIR=lib/x86_64-linux-gnu \
+         ${PIPEWIRE_OPTION} \
+         ${YOUTUBE_OPTIONS} \
+         ${TWITCH_OPTIONS} \
