@@ -25,9 +25,11 @@ jobs:
         id: setup0
         env:
           GH_TOKEN: ${{ github.token }}
+          patchHash: ${{ hashFiles('patch/**') }}
         run: |
           sha="$(gh api /repos/obsproject/obs-studio/commits | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
           echo "obsHashAPI=$sha" >> $GITHUB_OUTPUT
+          echo "patchHash=$patchHash" >> $GITHUB_OUTPUT
 
       - uses: actions/cache@v3
         with:
@@ -41,8 +43,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: obs-studio
-          key: obs-studio-${{ steps.setup0.outputs.obsHashAPI }}
-          restore-keys: obs-studio-
+          key: obs-studio-${{ runner.os }}-${{ steps.setup0.outputs.obsHashAPI }}-${{ steps.setup0.outputs.patchHash }}
 
       - name: 'Checkout obs-studio'
         uses: actions/checkout@v3
@@ -100,7 +101,7 @@ jobs:
         if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         with:
           path: obs-studio
-          key: obs-studio-${{ steps.setup.outputs.obsHash }}
+          key: obs-studio-${{ runner.os }}-${{ steps.setup0.outputs.obsHashAPI }}-${{ steps.setup0.outputs.patchHash }}
 
       - name: 'Restore obs-build-dependencies directory'
         uses: actions/cache/save@v3
