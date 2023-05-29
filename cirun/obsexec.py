@@ -40,6 +40,9 @@ class OBSExec:
     def term(self):
         self.config.clear_cache()
 
+        if self._is_terminated(timeout=0):
+            return
+
         if sys.platform != 'darwin':
             pyautogui.hotkey('ctrl', 'q')
             if self._is_terminated():
@@ -132,3 +135,8 @@ class OBSExec:
                     if sys.platform == 'linux':
                         os.system('ss -tnlp || sudo apt install -y iproute2 && ss -tnlp')
         raise err
+
+    def get_logfile(self):
+        logsdir = self.config.path + '/logs/'
+        logs = os.listdir(logsdir)
+        return logsdir + max(logs)
