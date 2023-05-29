@@ -25,6 +25,13 @@ class OBSExec:
             self.proc_obs = subprocess.Popen(['obs'])
         elif sys.platform == 'darwin':
             self.proc_obs = subprocess.Popen(['open', '-W', 'obs-studio/build_x86_64/UI/RelWithDebInfo/OBS.app'])
+        elif sys.platform == 'win32':
+            oldcwd = os.getcwd()
+            os.chdir('obs-studio/bin/64bit')
+            self.proc_obs = subprocess.Popen(['obs64.exe'])
+            os.chdir(oldcwd)
+        else:
+            raise Exception(f'Not supported platform: f{sys.platform}')
         sleep(5)
 
     def _is_terminated(self, timeout=10):
@@ -109,6 +116,26 @@ class OBSExec:
                         print(f'Info: OBS was terminated by {cmd}')
                         sys.stdout.flush()
                         return
+
+        elif sys.platform == 'win32':
+            try:
+                util.take_screenshot()
+                tt = util.u.find_texts('File Edit View Dock Profile Scene Collection Tools Help')
+                if len(tt) and tt[0].confidence > 0.7:
+                    loc = tt[0].location
+                    cx, cy = loc.center()
+                    cy -= loc.y1 - loc.y0
+                    pyautogui.click((cx, cy))
+                    pyautogui.hotkey('alt', 'f4')
+            except:
+                pass
+
+            if self._is_terminated():
+                return
+
+        self.proc_obs.kill()
+        if self._is_terminated():
+            return
 
         raise Exception('Failed to terminate obs')
 

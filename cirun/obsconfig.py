@@ -18,6 +18,10 @@ def _get_config_dir():
             return os.environ['HOME'] + '/.config/obs-studio'
     elif sys.platform == 'darwin':
         return os.environ['HOME'] + '/Library/Application Support/obs-studio'
+    elif sys.platform == 'win32':
+        return os.environ['AppData'] + '/obs-studio'
+    else:
+        raise Exception(f'Not supported platform: f{sys.platform}')
 
 
 def _generate_password():
