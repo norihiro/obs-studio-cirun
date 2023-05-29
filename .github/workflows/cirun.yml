@@ -185,6 +185,8 @@ jobs:
           obs --help
 
       - name: 'Run first time'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           timeout 3m xvfb-run cirun/firsttime.py
 
@@ -383,6 +385,8 @@ jobs:
           key: ffmpeg_gen-${{ hashFiles('cirun/ffmpeg_gen.py') }}
 
       - name: 'Run first time'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
           python3 cirun/firsttime.py
@@ -502,6 +506,8 @@ jobs:
           key: ffmpeg_gen-${{ hashFiles('cirun/ffmpeg_gen.py') }}
 
       - name: 'Run first time'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
           which python3
