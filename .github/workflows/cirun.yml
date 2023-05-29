@@ -82,7 +82,9 @@ jobs:
           script/workflow2env.py -w obs-studio/.github/workflows/main.yml -j linux_build -e CEF_BUILD_VERSION_LINUX > build.env
           . build.env
           cd obs-studio
-          patch -p1 < ../patch/cmake-coverage.patch
+          for p in ../patch/*.patch; do
+            patch -p1 < $p
+          done
           export RESTORED_CEF=''
           bash -x CI/build-linux.sh
 
@@ -331,7 +333,9 @@ jobs:
           fi
 
           cd obs-studio
-          patch -p1 < ../patch/cmake-coverage.patch
+          for p in ../patch/*.patch; do
+            patch -p1 < $p
+          done
           rm -rf build_x86_64/OBS.app
           export -n SEEKING_TESTERS
           export TERM=''
