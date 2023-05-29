@@ -79,7 +79,7 @@ def run_firsttime():
     global obs, record
     sleep(1)
 
-    if sys.platform != 'darwin':
+    if sys.platform == 'linux':
         record = desktoprecord.DesktopRecord(filename='desktop-firsttime.mkv')
 
     # Start OBS Studio
