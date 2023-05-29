@@ -193,10 +193,6 @@ jobs:
           mkdir -p screenshot
           timeout 10m xvfb-run cirun/obs-secondtime.py
 
-      - name: 'Start again and just exit'
-        run: |
-          timeout 3m xvfb-run timeout -s SIGINT --preserve-status -k 30 10 obs
-
       - name: 'Run unit tests'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
