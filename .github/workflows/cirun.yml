@@ -448,3 +448,94 @@ jobs:
           name: 'obs-studio-cirun-${{ runner.os }}-${{ steps.setup.outputs.obsHash }}'
           path: |
             .artifact/*
+
+  windows_run:
+    runs-on: 'windows-2022'
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: 'Checkout run-script'
+        uses: actions/checkout@v3
+
+      - name: 'Setup'
+        id: setup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha="$(gh api 'https://api.github.com/repos/obsproject/obs-studio/commits' | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
+          echo "obsHash=$sha" >> $GITHUB_OUTPUT
+
+          gh api "https://api.github.com/repos/obsproject/obs-studio/actions/artifacts?name=obs-studio-windows-x64-$sha" > artifact.json
+          gh api "$(jq '.["artifacts"][0]["archive_download_url"]' < artifact.json | tr -d '"')" > a.zip
+          7z x a.zip
+          7z x -oobs-studio obs-studio-*-windows-x64.zip
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-tesseract-ocr
+            mingw-w64-x86_64-tesseract-data-eng
+
+      - name: 'Prepare tools'
+        run: |
+          which pip3
+          pip3 install -U -r cirun/requirements.txt
+          pip3 install -U Pillow
+          git clone --depth=1 https://github.com/norihiro/untriseptium.git
+          (cd untriseptium && pip3 install -U ./)
+
+      - name: 'Create artifact directory'
+        env:
+          obsHash: ${{ steps.setup.outputs.obsHash }}
+        run: |
+          artifact=".artifact/$CIRUN_REFNAME/${obsHash}/${RUNNER_OS}/"
+          mkdir -p $artifact
+          mkdir -p {logs,screenshot}
+
+      - name: 'Cache test source files (OS independent)'
+        uses: actions/cache@v3
+        with:
+          path: ffmpeg_gen-cache
+          key: ffmpeg_gen-${{ hashFiles('cirun/ffmpeg_gen.py') }}
+
+      - name: 'Run first time'
+        run: |
+          set +e
+          which python3
+          PATH="$PATH:/d/a/_temp/msys64/mingw64/bin"
+          python3 cirun/firsttime.py
+
+      - name: 'Run unit tests'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          which python3
+          PATH="$PATH:/d/a/_temp/msys64/mingw64/bin"
+          python3 -m unittest discover cirun
+
+      - name: 'Upload log files'
+        if: always()
+        env:
+          CIRUN_DEPLOY_SSHKEY: ${{ secrets.CIRUN_DEPLOY_SSHKEY }}
+          CIRUN_DEPLOY_HOSTKEY: ${{ secrets.CIRUN_DEPLOY_HOSTKEY }}
+          CIRUN_DEPLOY_TARGET: ${{ secrets.CIRUN_DEPLOY_TARGET }}
+          obsHash: ${{ steps.setup.outputs.obsHash }}
+        run: |
+          set +x
+          mkdir -p /c/users/runneradmin/.ssh
+          echo "${CIRUN_DEPLOY_SSHKEY}" | base64 -d > /c/users/runneradmin/.ssh/id_ed25519
+          echo "${CIRUN_DEPLOY_HOSTKEY}" | base64 -d >> /c/users/runneradmin/.ssh/known_hosts
+          mv {logs,screenshot} ".artifact/$CIRUN_REFNAME/${obsHash}/${RUNNER_OS}/"
+          scp -r .artifact/* "${CIRUN_DEPLOY_TARGET}/" ||
+          scp -r .artifact/* "${CIRUN_DEPLOY_TARGET}/"
+
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'obs-studio-cirun-${{ runner.os }}-${{ steps.setup.outputs.obsHash }}'
+          path: |
+            .artifact/*
