@@ -70,7 +70,7 @@ class OBSConfig:
             return self._global
         self._global = configparser.RawConfigParser()
         self._global.optionxform = lambda option: option
-        self._global.read(self.path + '/global.ini')
+        self._global.read(self.path + '/global.ini', 'utf-8-sig')
         return self._global
 
     def save_global(self):
@@ -161,7 +161,7 @@ class OBSProfile:
             return self._config
         self._config = configparser.RawConfigParser()
         self._config.optionxform = lambda option: option
-        self._config.read(self.path + '/basic.ini')
+        self._config.read(self.path + '/basic.ini', 'utf-8-sig')
         return self._config
 
     def __getitem__(self, section):
