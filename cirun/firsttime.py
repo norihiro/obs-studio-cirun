@@ -75,6 +75,29 @@ def _app_permissions_macos():
 
     util.click_verbose(u.find_text('Continue'))
 
+
+def _new_update_available():
+    sleep(3)
+    try:
+        time_passed = 0
+        timeout = 10
+        while True:
+            sleep(1)
+            time_passed += 1
+            u.capture()
+            tt_update = u.find_texts('Update Now Remind me Later Skip Version')
+            if len(tt_update) > 0 and tt_update[0].confidence > 0.8:
+                util.click_verbose(tt_update[0])
+            tt_firsttime = u.find_texts('Specify what you want to use the program for')
+            if len(tt_update) > 0 and tt_update[0].confidence > 0.8:
+                return
+            if time_passed >= timeout:
+                s_bestmatch = f'current best match is "{tt[0].text}"' if len(tt) else 'no matching text'
+                raise TimeoutError(f'Cannot find "{text}" {s_bestmatch}')
+    except:
+        return
+
+
 def run_firsttime():
     global obs, record
     sleep(1)
@@ -89,6 +112,10 @@ def run_firsttime():
     if sys.platform == 'darwin':
         util.set_screenshot_prefix('screenshot/01-01-permissions-')
         _app_permissions_macos()
+
+    # New update
+    if sys.platform == 'win32':
+        _new_update_available()
 
     util.set_screenshot_prefix('screenshot/01-10-autoconf-')
 
