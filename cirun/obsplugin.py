@@ -13,6 +13,7 @@ import zipfile
 
 
 _installed_deb_packages = set()
+_installed_windows_files = set()
 
 
 def _gh_urlopen(url):
@@ -87,6 +88,19 @@ def install_plugin_ubuntu_deb_dpkg(filename):
             raise Exception(f'Failed to install the package {filename} with return code {ret}.')
 
 
+def install_plugin_windows_zip(filename):
+    '''
+    Install a ZIP plugin for macOS.
+    filename - file name on this system.
+    '''
+    dirname = 'obs-studio'
+
+    with zipfile.ZipFile(filename) as z:
+        z.extractall(dirname)
+        for a in z.namelist():
+            _installed_windows_files.add(dirname + '/' + a)
+
+
 def download_install_plugin_ubuntu(repo_name):
     '''
     Download and install the latest plugin.
@@ -112,6 +126,25 @@ def uninstall_all_plugins_ubuntu():
     for pkg in _installed_deb_packages:
         uninstall_dpkg(pkg)
     _installed_deb_packages.clear()
+
+
+def uninstall_all_plugins_windows():
+    rm_dirs = list()
+    for f in _installed_windows_files:
+        try:
+            os.remove(f)
+            print(f'removed a file "{f}"')
+        except:
+            rm_dirs.append(f)
+    rm_dirs.sort(reverse=True)
+    for f in rm_dirs:
+        try:
+            os.rmdir(f)
+            print(f'removed a directory "{f}"')
+        except:
+            print(f'could not remove "{f}"')
+            pass
+    _installed_windows_files.clear()
 
 
 def install_plugin_macos_zip(filename):
@@ -163,6 +196,16 @@ def download_install_plugin_macos(repo_name):
         install_plugin_macos_zip(filename)
 
 
+def download_install_plugin_windows(repo_name):
+    '''
+    Download and install the plugin for Windows.
+    repo_name - owner/repo on github.com to download and install.
+    '''
+    # Assumes the package names are the usual norihiro's convention.
+    filename = download_plugin(repo_name, '.*-Windows.zip')
+    install_plugin_windows_zip(filename)
+
+
 def download_install_plugin(repo_name):
     '''
     Download and install the latest plugin.
@@ -173,6 +216,9 @@ def download_install_plugin(repo_name):
     if sys.platform == 'darwin':
         return download_install_plugin_macos(repo_name)
 
+    if sys.platform == 'win32':
+        return download_install_plugin_windows(repo_name)
+
     import tiny
     if tiny.is_ubuntu():
         return download_install_plugin_ubuntu(repo_name)
@@ -182,6 +228,7 @@ def download_install_plugin(repo_name):
 
 def uninstall_all_plugins():
     uninstall_all_plugins_ubuntu()
+    uninstall_all_plugins_windows()
 
 
 if __name__ == '__main__':
@@ -192,6 +239,7 @@ if __name__ == '__main__':
     parser.add_argument('repo_name', help='owner/repo on github.com')
     parser.add_argument('--ubuntu', action='store_true', help='Select a package for Ubuntu.')
     parser.add_argument('--macos', action='store_true', help='Select a package for macOS.')
+    parser.add_argument('--windows', action='store_true', help='Select a package for Windows.')
     parser.add_argument('--uninstall', action='store_true', help='After installing, uninstall it.')
     args = parser.parse_args()
 
@@ -201,8 +249,14 @@ if __name__ == '__main__':
     if args.macos:
         download_install_plugin_macos(args.repo_name)
 
-    if not args.ubuntu and not args.macos:
+    if args.windows:
+        download_install_plugin_windows(args.repo_name)
+
+    if not args.ubuntu and not args.macos and not args.windows:
         download_install_plugin(args.repo_name)
 
     if args.ubuntu and args.uninstall:
         uninstall_all_plugins_ubuntu()
+
+    if args.windows and args.uninstall:
+        uninstall_all_plugins_windows()
