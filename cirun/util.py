@@ -7,7 +7,7 @@ from untriseptium import Untriseptium
 
 
 def current_window_geometry():
-    if sys.platform == 'darwin':
+    if sys.platform == 'darwin' or sys.platform == 'win32':
         import pygetwindow as gw
         a = gw.getActiveWindow()
         x0 = a.left
