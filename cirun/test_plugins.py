@@ -29,7 +29,7 @@ class OBSPluginTest(obstest.OBSTest):
             return f.read().split('\n')
 
     def _assert_log(self, loglines, cond):
-        self.assertTrue(_find_line_re(loglines, cond))
+        self.assertTrue(_find_line_re(loglines, cond), msg=f'Cannot find "{cond}" in the log file, last log file is {self.obs.get_logfile()}')
 
     def test_audio_plugins(self):
         obsplugin.download_install_plugin('norihiro/obs-asynchronous-audio-source')
