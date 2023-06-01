@@ -250,7 +250,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: 'obs-studio-cirun-${{ steps.setup.outputs.obsHash }}'
+          name: 'obs-studio-cirun-${{ runner.os }}-${{ steps.setup.outputs.obsHash }}'
           path: |
             .artifact/*
 
@@ -445,6 +445,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: 'obs-studio-cirun-macos-${{ steps.setup.outputs.obsHash }}'
+          name: 'obs-studio-cirun-${{ runner.os }}-${{ steps.setup.outputs.obsHash }}'
           path: |
             .artifact/*
