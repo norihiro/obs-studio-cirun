@@ -198,7 +198,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          timeout 30m xvfb-run python3 -m unittest discover cirun
+          timeout 30m xvfb-run python3 -m unittest discover -v cirun
 
       - name: 'Gather coverage data'
         if: always()
@@ -397,7 +397,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 -m unittest discover cirun
+          python3 -m unittest discover -v cirun
 
       - name: 'Gather coverage data'
         if: always()
@@ -514,7 +514,7 @@ jobs:
         run: |
           which python3
           PATH="$PATH:/d/a/_temp/msys64/mingw64/bin"
-          python3 -m unittest discover cirun
+          python3 -m unittest discover -v cirun
 
       - name: 'Upload log files'
         if: always()
