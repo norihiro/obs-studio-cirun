@@ -173,6 +173,13 @@ jobs:
           ln -s $artifact/screenshot .
           ln -s $artifact/logs .
 
+      - name: 'Cache plugin packages'
+        uses: actions/cache@v3
+        with:
+          path: plugin-cache
+          key: plugin-${{ runner.os }}-${{ hashFiles('cirun/*plugin*') }}
+          restore-keys: plugin-${{ runner.os }}-
+
       - name: 'Cache test source files (OS independent)'
         uses: actions/cache@v3
         with:
@@ -378,6 +385,13 @@ jobs:
           ln -s $artifact/screenshot .
           ln -s $artifact/logs .
 
+      - name: 'Cache plugin packages'
+        uses: actions/cache@v3
+        with:
+          path: plugin-cache
+          key: plugin-${{ runner.os }}-${{ hashFiles('cirun/*plugin*') }}
+          restore-keys: plugin-${{ runner.os }}-
+
       - name: 'Cache test source files (OS independent)'
         uses: actions/cache@v3
         with:
@@ -498,6 +512,13 @@ jobs:
           artifact=".artifact/$CIRUN_REFNAME/${obsHash}/${RUNNER_OS}/"
           mkdir -p $artifact
           mkdir -p {logs,screenshot}
+
+      - name: 'Cache plugin packages'
+        uses: actions/cache@v3
+        with:
+          path: plugin-cache
+          key: plugin-${{ runner.os }}-${{ hashFiles('cirun/*plugin*') }}
+          restore-keys: plugin-${{ runner.os }}-
 
       - name: 'Cache test source files (OS independent)'
         uses: actions/cache@v3
