@@ -3,6 +3,7 @@ This module provides functions to download and install plugins released on GitHu
 The release format, such as file names and content-types, assumes the one made by norihiro.
 '''
 
+import hashlib
 import json
 import os
 import re
@@ -11,6 +12,8 @@ import urllib.request
 import tempfile
 import zipfile
 
+
+_plugin_cache_dir = 'plugin-cache'
 
 _installed_deb_packages = set()
 _installed_windows_files = set()
@@ -54,17 +57,30 @@ def download_plugin(repo_name, file_re):
 
     aa = sorted(aa, key=lambda a: a['name'])
     url = None
+    expected_size = 0
     for a in aa:
         name = a['name']
         if has_obs27 and has_obs28 and ('obs27' in name):
             continue
         url = a['browser_download_url']
+        expected_size = a['size']
 
     if not url:
         print('Error: no matching package is found. Available packages are as below.')
         for a in latest['assets']:
             print('  ' + a['name'])
         raise ValueError(f'No matching package for {file_re}')
+
+    try:
+        dirname = _plugin_cache_dir + '/' + hashlib.sha1(url.encode()).hexdigest()
+        os.makedirs(dirname, mode=0o755, exist_ok=True)
+        name = dirname + '/' + name
+        with open(name, 'rb') as f:
+            if len(f.read()) == expected_size:
+                print(f'Info: Using cached file: {name}')
+                return name
+    except:
+        pass
 
     print(f'Info: Downloading "{name}"...')
 
