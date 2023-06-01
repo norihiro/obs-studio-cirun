@@ -12,6 +12,8 @@ def _is_obs_running():
             return True
         if sys.platform == 'darwin' and p.name() == 'OBS':
             return True
+        if sys.platform == 'win32' and p.name().lower() == 'obs64.exe':
+            return True
     return False
 
 
