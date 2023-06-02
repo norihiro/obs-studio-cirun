@@ -46,6 +46,7 @@ jobs:
           key: obs-studio-${{ runner.os }}-${{ steps.setup0.outputs.obsHashAPI }}-${{ steps.setup0.outputs.patchHash }}
 
       - name: 'Checkout obs-studio'
+        if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v3
         with:
           repository: 'obsproject/obs-studio'
@@ -57,7 +58,6 @@ jobs:
       - name: 'Setup build environment'
         id: setup
         run: |
-          (cd obs-studio && git pull && git submodule update --recursive)
           echo "obsHash=$(cd obs-studio && git rev-parse --short=9 HEAD)" >> $GITHUB_OUTPUT
 
       - name: 'Restore obs-build-dependencies directory'
@@ -83,15 +83,19 @@ jobs:
           script/workflow2env.py -w obs-studio/.github/workflows/main.yml -j linux_build -e CEF_BUILD_VERSION_LINUX > build.env
           . build.env
           cd obs-studio
-          for p in ../patch/*.patch; do
-            patch -p1 < $p
-          done
-          export RESTORED_CEF=''
-          bash -x CI/build-linux.sh
+          if test "${{ steps.obs-studio-cache.outputs.cache-hit }}" != 'true'; then
+            for p in ../patch/*.patch; do
+              patch -p1 < $p
+            done
+            export RESTORED_CEF=''
+            bash -x CI/build-linux.sh
+          else
+            bash -x CI/linux/01_install_dependencies.sh
+          fi
 
       - name: 'Save ccache'
         uses: actions/cache/save@v3
-        if: always()
+        if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         with:
           path: ${{ github.workspace }}/.ccache
           key: cirun-ccache-${{ steps.setup.outputs.obsHash }}
@@ -354,7 +358,7 @@ jobs:
           CI/macos/02_build_obs.sh --architecture x86_64
 
       - name: 'Save ccache'
-        if: always()
+        if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v3
         with:
           path: ${{ github.workspace }}/.ccache
