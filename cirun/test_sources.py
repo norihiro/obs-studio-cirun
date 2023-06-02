@@ -145,6 +145,9 @@ sources = [
             'sceneName': 'VLC',
             'inputKind': 'vlc_source',
             'inputSettings': {
+                "playlist": [
+                    { 'value': ffmpeg_gen.lavfi_testsrc2(), }
+                    ],
                 },
             },
         ]
