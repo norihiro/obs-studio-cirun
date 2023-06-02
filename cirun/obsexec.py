@@ -79,6 +79,7 @@ class OBSExec:
                         'requestData': {
                             'reason': 'requested by OBSExec.term_ws()',
                             'support_url': 'https://github.com/norihiro/obs-studio-cirun/issues',
+                            'force': True,
                         },
                     })
                 except:
