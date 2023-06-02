@@ -45,18 +45,22 @@ class OBSConfig:
         shutil.rmtree(name, ignore_errors=True)
         shutil.copytree(self.path + '/', name, symlinks=True)
 
-    def move_logs(self):
+    def _move_logs(self, path_logs, dest):
         try:
-            path_logs = self.path + '/logs/'
             for f in os.listdir(path_logs):
                 try:
-                    shutil.move(path_logs + f, './logs/')
+                    shutil.move(path_logs + f, dest)
                 except FileNotFoundError:
                     break
                 except:
                     pass
         except:
             pass
+
+    def move_logs(self):
+        dest = './logs/'
+        self._move_logs(self.path + '/logs/', dest)
+        self._move_logs(self.path + '/crashes/', dest)
 
     def _clean_config_dir(self):
         self.move_logs()
