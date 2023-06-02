@@ -1,0 +1,74 @@
+name: Build obs-studio
+
+inputs:
+  use_cache:
+    description: 'Set "true" if obs-studio directory was restored.'
+    required: true
+  obs_hash:
+    description: 'Hash of the obs-studio commit'
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: 'Restore obs-build-dependencies directory'
+      id: obs-build-dependencies-cache
+      if: ${{ runner.os == 'Linux' && github.event_name != 'schedule'}}
+      uses: actions/cache/restore@v3
+      with:
+        path: obs-build-dependencies
+        key: obs-build-dependencies-${{ inputs.obs_hash }}
+        restore-keys: obs-build-dependencies-
+
+    - name: 'Configure and build obs-studio'
+      if: ${{ runner.os == 'Linux' }}
+      shell: bash
+      run: |
+        set -ex
+        script/workflow2env.py -w obs-studio/.github/workflows/main.yml -j linux_build -e CEF_BUILD_VERSION_LINUX > build.env
+        . build.env
+        cd obs-studio
+        if test "${{ inputs.use_cache }}" != 'true'; then
+          for p in ../patch/*.patch; do
+            patch -p1 < $p
+          done
+          export RESTORED_CEF=''
+          bash -x CI/build-linux.sh
+        else
+          bash -x CI/linux/01_install_dependencies.sh
+        fi
+
+    - name: 'Build obs-studio'
+      if: ${{ runner.os == 'macOS' && inputs.use_cache != 'true' }}
+      shell: bash
+      run: |
+        REMOVE_FORMULAS=""
+        for FORMULA in ${{ env.BLOCKED_FORMULAS }}; do
+          if [ -d "/usr/local/opt/${FORMULA}" ]; then
+            REMOVE_FORMULAS="${REMOVE_FORMULAS} ${FORMULA}"
+          fi
+        done
+        if [ -n "${REMOVE_FORMULAS}" ]; then
+          brew uninstall ${REMOVE_FORMULAS}
+        fi
+
+        cd obs-studio
+        for p in ../patch/*.patch; do
+          patch -p1 < $p
+        done
+        rm -rf build_x86_64/OBS.app
+        export -n SEEKING_TESTERS
+        export TERM=''
+        export -n CI
+        export -n GITHUB_RUN_ID
+        CI/macos/01_install_dependencies.sh --architecture x86_64
+        CI/macos/02_build_obs.sh --architecture x86_64
+
+    - name: 'Save obs-build-dependencies directory'
+      uses: actions/cache/save@v3
+      if: ${{ runner.os == 'Linux' && inputs.use_cache != 'true' }}
+      with:
+        path: obs-build-dependencies
+        key: obs-build-dependencies-${{ inputs.obs_hash }}
+

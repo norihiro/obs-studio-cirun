@@ -1,0 +1,16 @@
+name: Cache and restore pip cache
+
+runs:
+  using: 'composite'
+
+  steps:
+    - shell: bash
+      id: path
+      run: |
+        python3 -c "from pip._internal.locations import USER_CACHE_DIR; print('pip_cache_path=' + USER_CACHE_DIR)" >> $GITHUB_OUTPUT
+
+    - uses: actions/cache@v3
+      with:
+        path: ${{ steps.path.outputs.pip_cache_path }}
+        key: pip-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: pip-${{ runner.os }}-
