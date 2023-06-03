@@ -72,7 +72,13 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 0
           clean: false
-          ref: ${{ env.obs_hash }}
+
+      - name: 'Checkout obs-studio ${{env.obs_hash}}'
+        if: ${{ runner.os != 'Windows' && steps.obs-studio-cache.outputs.cache-hit != 'true' }}
+        run: |
+          cd obs-studio
+          git checkout $obs_hash
+          git submodule update --recursive
 
       - name: 'Restore ccache'
         id: ccache-cache
