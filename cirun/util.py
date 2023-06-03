@@ -177,7 +177,7 @@ def ocr_mainmenu(capture=True):
             u.ocr(crop=(0, 0, u.screenshot.width, 40))
 
         tt = u.find_texts('File Edit View Docks Profile Scene Collection Tools Help')
-        if tt[0].confidence > 0.8:
+        if len(tt) > 0 and tt[0].confidence > 0.8:
             return
 
         sleep(2)
