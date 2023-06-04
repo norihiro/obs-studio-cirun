@@ -89,6 +89,23 @@ def click_verbose(t, location_ratio=None):
     return t
 
 
+def ocr_verbose(**kwargs):
+    u.ocr(**kwargs)
+
+    def draw(d):
+        if 'crop' in kwargs:
+            d.rectangle(kwargs['crop'], outline=(255, 0, 0, 128))
+        for t in u.ocrdata:
+            if not t.text:
+                continue
+            try:
+                d.text((t.location.x0, t.location.y0), t.text, fill=(255, 0, 0, 128))
+            except:
+                pass
+
+    take_screenshot(capture=False, draw_cb=draw)
+
+
 def ocr_topwindow(mode=None, length=0, ratio=-1):
     sleep(0.1)
     u.capture()
@@ -140,7 +157,7 @@ def set_screenshot_prefix(name):
     os.makedirs(os.path.dirname(name), exist_ok=True)
 
 
-def take_screenshot(capture=True):
+def take_screenshot(capture=True, draw_cb=None):
     global _screenshot_prefix
     global _screenshot_index
     if capture or not u.screenshot:
@@ -151,6 +168,13 @@ def take_screenshot(capture=True):
     print(f'Info: Saving screenshot to {name}')
     sys.stdout.flush()
     u.screenshot.save(name)
+    if draw_cb:
+        from PIL import ImageDraw
+        im = u.screenshot.copy()
+        d = ImageDraw.Draw(im)
+        draw_cb(d)
+        name = f'{_screenshot_prefix}{_screenshot_index:02d}.d.png'
+        im.save(name)
     _screenshot_index += 1
 
 
