@@ -4,7 +4,10 @@ import sys
 from time import sleep
 import pyautogui
 from untriseptium import Untriseptium
+import untriseptium.util
 
+
+sleep_after_click = 0.2
 
 def current_window_geometry():
     if sys.platform == 'darwin' or sys.platform == 'win32':
@@ -35,6 +38,22 @@ def current_window_center():
     return (int((loc[0] + loc[2]) / 2), int((loc[1] + loc[3]) / 2))
 
 
+def expand_locator(loc, length):
+    '''
+    Returns a rectangle expanded by length from the loc.
+    The return type is a 4-element tuple.
+    loc - 4-element tuple describing a rectangle. Some other types are also accepted.
+    '''
+    if isinstance(loc, untriseptium.util.TextLocator):
+        loc = loc.location
+    if isinstance(loc, untriseptium.util.Location):
+        loc = (loc.x0, loc.y0, loc.x1, loc.y1)
+    if len(loc) == 2:
+        loc = (loc[0], loc[1], loc[0], loc[1])
+
+    return (max(0, loc[0] - length), max(0, loc[1] - length), loc[2] + length, loc[3] + length)
+
+
 def wait_text(text, confidence_threshold=0.9, sleep_each=1, timeout=None, ocrfunc=None):
     '''
     Waits until the specified text appears on the screen.
@@ -49,17 +68,25 @@ def wait_text(text, confidence_threshold=0.9, sleep_each=1, timeout=None, ocrfun
             ocrfunc(u)
         tt = u.find_texts(text)
         if len(tt) > 0 and tt[0].confidence > confidence_threshold:
-            break
+            return tt[0]
         if timeout and time_passed >= timeout:
             s_bestmatch = f'current best match is "{tt[0].text}"' if len(tt) else 'no matching text'
             raise TimeoutError(f'Cannot find "{text}" {s_bestmatch}')
 
 
-def click_verbose(t):
+def click_verbose(t, location_ratio=None):
     print(f'Clicking text="{t.text}" location={t.location} confidence={t.confidence}')
     sys.stdout.flush()
-    t.click()
-    sleep(0.2)
+    if location_ratio:
+        x = int(t.location.x0 * (1.0 - location_ratio[0]) + t.location.x1 * location_ratio[0])
+        y = int(t.location.y0 * (1.0 - location_ratio[1]) + t.location.y1 * location_ratio[1])
+        u.click((x, y))
+        pass
+    else:
+        t.click()
+    global sleep_after_click
+    sleep(sleep_after_click)
+    return t
 
 
 def ocr_topwindow(mode=None, length=0, ratio=-1):
