@@ -11,17 +11,13 @@ import util
 class OBSLogTest(obstest.OBSTest):
     def test_upload_current_log(self):
         u = util.u
-        if sys.platform == 'darwin':
-            ocr_topwindow = util.ocr_screen
-        else:
-            ocr_topwindow = util.ocr_topwindow
         util.set_screenshot_prefix('screenshot/test_upload_current_log-')
-        util.click_verbose(u.find_text('Help'))
+        t = util.click_verbose(u.find_text('Help'))
+        util.ocr_verbose(crop=util.expand_locator(t, 200))
+        t = u.find_text('Log Files')
+        t.move() # A click will close the menu on macOS. Just move the cursor.
         util.take_screenshot()
-        ocr_topwindow(mode='top', length=500)
-        util.click_verbose(u.find_text('Log Files'))
-        util.take_screenshot()
-        ocr_topwindow(mode='top', length=500)
+        util.ocr_verbose(crop=util.expand_locator(t, 450))
         util.click_verbose(u.find_text('Upload Current Log File'))
         util.take_screenshot()
         sleep(4)
