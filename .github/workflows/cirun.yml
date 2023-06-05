@@ -175,10 +175,10 @@ jobs:
         run: |
           ./wrapper.sh python3 -m unittest discover -v cirun
 
-      - name: 'Gather coverage data'
-        if: ${{ runner.os != 'Windows' }}
+      - name: 'Gather coverage and log files'
+        if: ${{ always() && runner.os != 'Windows' }}
         run: |
-          set -e
+          set +e
           cd obs-studio
           lcov \
             --exclude '/usr/*' \
@@ -193,12 +193,10 @@ jobs:
             --exclude '*/obs-outputs/librtmp/*' \
             --exclude '*/rnnoise/src/*' \
             -q \
-            -c -d . -o ../artifact/lcov.info
+            -c -d . -o ../artifact/lcov.info &&
           genhtml -q ../artifact/lcov.info -o ../artifact/coverage/
+          cd -
 
-      - name: 'Gather log files'
-        if: ${{ runner.os != 'Windows' }}
-        run: |
           case "${{runner.os}}" in
             Linux)
               mv -f $HOME/.config/obs-studio/logs/* logs/
