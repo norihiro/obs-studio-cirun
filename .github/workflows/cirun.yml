@@ -136,6 +136,9 @@ jobs:
           mkdir -p $artifact
           mkdir -p {logs,screenshot}
           ln -s $artifact artifact
+          if test "${{runner.os}}" == 'macOS'; then
+            rm -f $HOME/Library/Logs/DiagnosticReports/* || true
+          fi
 
       - name: 'Cache plugin packages'
         uses: actions/cache@v3
@@ -208,7 +211,9 @@ jobs:
               rsync -a --exclude obs-browser $HOME/.config/obs-studio/ artifact/config-obs-studio/
               ;;
             macOS)
-              mv -f $HOME/'Library/Application Support/obs-studio/logs'/* logs/
+              mv -f $HOME/'Library/Application Support/obs-studio/logs'/* logs/ || true
+              rmdir $HOME/Library/Logs/DiagnosticReports/Retired || true
+              mv -f $HOME/Library/Logs/DiagnosticReports/* logs/ || true
               ;;
           esac
 
