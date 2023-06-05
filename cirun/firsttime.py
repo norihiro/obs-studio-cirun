@@ -183,6 +183,7 @@ def terminate_firsttime():
     obsconfig.append_preset(obs.config)
 
     profile = obs.config.get_profile()
+    profile['General']['Language'] = 'en-US'
     profile['Video']['BaseCX'] = '1280'
     profile['Video']['BaseCY'] = '720'
     profile['Video']['OutputCX'] = '1280'
