@@ -183,10 +183,9 @@ class OBSFilterTest(obstest.OBSTest):
                         sleep(f['sleep_after_update'])
                     i += 1
 
-            util.take_screenshot()
-
         with self.subTest(msg='open setting dialogs'):
             for f in ff:
+                cl.send('SetCurrentProgramScene', {'sceneName': 'Scene ' + f['sourceName']})
                 cl.send('OpenInputFiltersDialog', {'inputName': f['sourceName']})
                 util.take_screenshot()
                 pyautogui.hotkey('esc')
