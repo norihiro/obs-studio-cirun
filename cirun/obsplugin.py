@@ -121,8 +121,19 @@ def download_install_plugin_ubuntu(repo_name):
     repo_name - owner/repo on github.com to download and install.
     Unlike macOS, installed plugin need to be removed by uninstall_all_plugins_ubuntu() or uninstall_all_plugins()
     '''
-    filename = download_plugin(repo_name, '.*-ubuntu.*\.deb$')
+    if repo_name == 'glikely/obs-ptz':
+        filename = download_plugin(repo_name, '.*-linux-x86_64\.deb$')
+    else:
+        filename = download_plugin(repo_name, '.*-ubuntu.*\.deb$')
     install_plugin_ubuntu_deb_dpkg(filename)
+
+    if repo_name == 'glikely/obs-ptz':
+        # TODO: Add it to the dependency list.
+        with subprocess.Popen(['sudo', 'apt-get', 'install', '-y', 'libqt6serialport6']) as p:
+            ret = p.wait()
+            if ret != 0:
+                raise Exception(f'Failed to install the package libqt6serialport6 with return code {ret}.')
+            _installed_deb_packages.add('libqt6serialport6')
 
     # Assuming the package name is same as the repository name.
     # FIXME: Instead, check the names of the installed packages.
@@ -215,8 +226,11 @@ def download_install_plugin_windows(repo_name):
     Download and install the plugin for Windows.
     repo_name - owner/repo on github.com to download and install.
     '''
-    # Assumes the package names are the usual norihiro's convention.
-    filename = download_plugin(repo_name, '.*-Windows.zip$')
+    if repo_name == 'glikely/obs-ptz':
+        filename = download_plugin(repo_name, '.*-windows-x64.zip$')
+    else:
+        # Assumes the package names are the usual norihiro's convention.
+        filename = download_plugin(repo_name, '.*-Windows.zip$')
     install_plugin_windows_zip(filename)
 
 
