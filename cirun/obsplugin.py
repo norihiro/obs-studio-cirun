@@ -93,12 +93,10 @@ def download_plugin(repo_name, file_re):
 
 def install_plugin_ubuntu_deb_dpkg(filename):
     '''
-    Install a DEB plugin on Ubuntu using 'dpkg' command.
+    Install a DEB plugin on Ubuntu using 'apt-get' command.
     filename - file name on this system.
     '''
-    # apt-get cannot install because I didn't install obs-studio package.
-    # FIXME: 'obs-studio' should be installed using apt. Then, use apt-get here.
-    with subprocess.Popen(['sudo', 'dpkg', '-i', '--ignore-depends=obs-studio', filename]) as p:
+    with subprocess.Popen(['sudo', 'apt-get', 'install', '-y', os.path.abspath(filename)]) as p:
         ret = p.wait()
         if ret != 0:
             raise Exception(f'Failed to install the package {filename} with return code {ret}.')
