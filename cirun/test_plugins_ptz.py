@@ -19,8 +19,9 @@ class OBSPTZTest(obstest.OBSTest):
         u = util.u
         util.take_screenshot()
         util.ocr_mainmenu()
-        util.click_verbose(u.find_text('Docks'))
+        t = util.click_verbose(u.find_text('Docks'))
         util.take_screenshot()
+        util.ocr_verbose(crop=util.expand_locator(t, (120, 0, 120, 360)))
         util.click_verbose(u.find_text('PTZ Controls'))
 
         sleep(3)
