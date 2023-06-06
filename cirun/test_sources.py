@@ -214,6 +214,10 @@ class OBSSourceTest(obstest.OBSTest):
             self.obs.run()
             self.assertTrue(obstest._is_obs_running())
 
+        with self.subTest(msg='interact'):
+            cl = self.obs.get_obsws()
+            cl.send('OpenInputInteractDialog', {'inputName': 'browser'})
+
         with self.subTest(msg='cleanup'):
             cl = self.obs.get_obsws()
             for source in sources:

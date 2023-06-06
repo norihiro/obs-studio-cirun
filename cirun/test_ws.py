@@ -78,6 +78,20 @@ class OBSWSTest(obstest.OBSTest):
         with self.subTest(msg='GetInputSettings'):
             cl.send('GetInputSettings', {'inputName': 'color-random'})
 
+        with self.subTest(msg='UI'):
+            r = cl.send('GetStudioModeEnabled')
+            self.assertFalse(r.studio_mode_enabled)
+
+            cl.send('SetStudioModeEnabled', {'studioModeEnabled': True})
+            r = cl.send('GetStudioModeEnabled')
+            self.assertTrue(r.studio_mode_enabled)
+
+            cl.send('SetStudioModeEnabled', {'studioModeEnabled': False})
+            r = cl.send('GetStudioModeEnabled')
+            self.assertFalse(r.studio_mode_enabled)
+
+            cl.send('GetMonitorList')
+
 
 if __name__ == '__main__':
     unittest.main()
