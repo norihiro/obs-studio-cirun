@@ -121,7 +121,7 @@ def download_install_plugin_ubuntu(repo_name):
     repo_name - owner/repo on github.com to download and install.
     Unlike macOS, installed plugin need to be removed by uninstall_all_plugins_ubuntu() or uninstall_all_plugins()
     '''
-    filename = download_plugin(repo_name, '.*-ubuntu.*\.deb')
+    filename = download_plugin(repo_name, '.*-ubuntu.*\.deb$')
     install_plugin_ubuntu_deb_dpkg(filename)
 
     # Assuming the package name is same as the repository name.
@@ -202,11 +202,11 @@ def download_install_plugin_macos(repo_name):
     repo_name - owner/repo on github.com to download and install.
     '''
     if repo_name == 'glikely/obs-ptz':
-        filename = download_plugin(repo_name, '.*-macos-(universal|x86_64).pkg')
+        filename = download_plugin(repo_name, '.*-macos-(universal|x86_64).pkg$')
         install_plugin_macos_pkg(filename)
     else:
         # Assumes the package names are the usual norihiro's convention.
-        filename = download_plugin(repo_name, '.*-macos(-universal|-x86_64|).zip')
+        filename = download_plugin(repo_name, '.*-macos(-universal|-x86_64|).zip$')
         install_plugin_macos_zip(filename)
 
 
@@ -216,7 +216,7 @@ def download_install_plugin_windows(repo_name):
     repo_name - owner/repo on github.com to download and install.
     '''
     # Assumes the package names are the usual norihiro's convention.
-    filename = download_plugin(repo_name, '.*-Windows.zip')
+    filename = download_plugin(repo_name, '.*-Windows.zip$')
     install_plugin_windows_zip(filename)
 
 
