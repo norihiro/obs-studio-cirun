@@ -51,7 +51,10 @@ def expand_locator(loc, length):
     if len(loc) == 2:
         loc = (loc[0], loc[1], loc[0], loc[1])
 
-    return (max(0, loc[0] - length), max(0, loc[1] - length), loc[2] + length, loc[3] + length)
+    if isinstance(length, int) or isinstance(length, float):
+        length = (length, length, length, length)
+
+    return (max(0, loc[0] - length[0]), max(0, loc[1] - length[1]), loc[2] + length[2], loc[3] + length[3])
 
 
 def wait_text(text, confidence_threshold=0.9, sleep_each=1, timeout=None, ocrfunc=None):
