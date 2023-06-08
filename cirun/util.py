@@ -223,9 +223,13 @@ def ocr_mainmenu(capture=True):
     retry = 5
     while retry > 0:
         retry -= 1
-        if sys.platform != 'darwin':
+        if sys.platform == 'linux':
             geo = current_window_geometry()
             u.ocr(crop=(geo[0], geo[1], geo[2], geo[1]+50))
+
+        elif sys.platform == 'win32':
+            geo = current_window_geometry()
+            u.ocr(crop=(geo[0], geo[1]+32, geo[2], geo[1]+50))
 
         else:
             u.ocr(crop=(0, 0, u.screenshot.width, 40))
@@ -235,3 +239,6 @@ def ocr_mainmenu(capture=True):
             return
 
         sleep(2)
+
+    print('Warning: ocr_mainmenu failed to find main menu.', flush=True)
+    take_screenshot(capture=False, draw_cb=draw_ocrdata)
