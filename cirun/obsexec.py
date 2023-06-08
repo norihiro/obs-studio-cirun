@@ -161,6 +161,7 @@ class OBSExec:
             print('Error: failed to wait obs though SIGKILL was sent.')
             sys.stdout.flush()
 
+        if sys.platform == 'darwin':
             for cmd in ('killall -INT', 'killall'):
                 retry = 2
                 while retry > 0:
