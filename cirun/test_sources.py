@@ -36,6 +36,7 @@ sources = [
                     },
                 {
                     'drop_shadow': False,
+                    'word_wrap': True,
                     'custom_width': 720,
                     },
                 ]
