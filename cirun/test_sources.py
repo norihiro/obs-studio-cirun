@@ -56,6 +56,11 @@ sources = [
             'update_settings': [
                 {
                     'randomize': True,
+                    'use_custom_size': '1280x720',
+                    },
+                {
+                    'randomize': True,
+                    'use_custom_size': '16:9',
                     },
                 ],
             },
@@ -219,6 +224,16 @@ class OBSSourceTest(obstest.OBSTest):
             self.assertFalse(obstest._is_obs_running())
             self.obs.run()
             self.assertTrue(obstest._is_obs_running())
+
+            cl = self.obs.get_obsws()
+            cl.send('SetInputSettings', {
+                'inputName': 'text',
+                'inputSettings': {
+                    'from_file': True,
+                    'log_mode': True,
+                    'text_file': self.obs.get_logfile(),
+                }
+            })
 
         with self.subTest(msg='interact'):
             cl = self.obs.get_obsws()
