@@ -92,19 +92,23 @@ def click_verbose(t, location_ratio=None):
     return t
 
 
+def draw_ocrdata(d):
+    for t in u.ocrdata:
+        if not t.text:
+            continue
+        try:
+            d.text((t.location.x0, t.location.y0), t.text, fill=(255, 0, 0, 128))
+        except:
+            pass
+
+
 def ocr_verbose(**kwargs):
     u.ocr(**kwargs)
 
     def draw(d):
         if 'crop' in kwargs:
             d.rectangle(kwargs['crop'], outline=(255, 0, 0, 128))
-        for t in u.ocrdata:
-            if not t.text:
-                continue
-            try:
-                d.text((t.location.x0, t.location.y0), t.text, fill=(255, 0, 0, 128))
-            except:
-                pass
+        draw_ocrdata(d)
 
     take_screenshot(capture=False, draw_cb=draw)
 
