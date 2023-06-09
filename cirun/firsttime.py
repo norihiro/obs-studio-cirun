@@ -7,7 +7,6 @@ import pyautogui
 from time import sleep
 from obsexec import OBSExec
 import obsconfig
-import obsplugin
 import desktoprecord
 import util
 
@@ -106,16 +105,8 @@ def run_firsttime():
     if sys.platform == 'linux':
         record = desktoprecord.DesktopRecord(filename='desktop-firsttime.mkv')
 
-    cfg = obsconfig.OBSConfigClean()
-
-    try:
-        obsplugin.download_install_plugin('norihiro/obs-shutdown-plugin')
-    except:
-        import traceback
-        traceback.print_exc(file=sys.stdout)
-
     # Start OBS Studio
-    obs = OBSExec(cfg)
+    obs = OBSExec(obsconfig.OBSConfigClean())
 
     # App Permission
     if sys.platform == 'darwin':

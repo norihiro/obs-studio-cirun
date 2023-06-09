@@ -160,8 +160,6 @@ jobs:
           obs --help
 
       - name: 'Run first time'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./wrapper.sh python3 cirun/firsttime.py
 

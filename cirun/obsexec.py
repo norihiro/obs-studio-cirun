@@ -46,47 +46,6 @@ class OBSExec:
         except subprocess.TimeoutExpired:
             return False
 
-    def term_ws(self):
-        try:
-            if self._obsws:
-                self._obsws.base_client.ws.close()
-                self._obsws = None
-        except:
-            pass
-
-        try:
-            global_cfg = self.config.get_global()
-            if global_cfg['OBSWebSocket']['ServerEnabled'] != 'true':
-                return
-
-            with self.get_obsws(use_cache=False) as cl:
-                try:
-                    cl.send('StopRecord')
-                    sleep(3)
-                except:
-                    pass
-
-                try:
-                    cl.send('StopStream')
-                    sleep(3)
-                except:
-                    pass
-
-                try:
-                    cl.send('CallVendorRequest', {
-                        'vendorName': 'obs-shutdown-plugin',
-                        'requestType': 'shutdown',
-                        'requestData': {
-                            'reason': 'requested by OBSExec.term_ws()',
-                            'support_url': 'https://github.com/norihiro/obs-studio-cirun/issues',
-                            'force': True,
-                        },
-                    })
-                except:
-                    print('The shutdown API was not accepted, is obs-shutdown-plugin installed correctly?')
-        except:
-            print('Failed to shutdown through API, is websocket server working?')
-
     def term_hotkey(self):
         if sys.platform == 'linux':
             pyautogui.hotkey('ctrl', 'q')
@@ -144,6 +103,23 @@ class OBSExec:
             except:
                 pass
 
+    def term_by_sigint(self):
+        if sys.platform == 'linux':
+            self.proc_obs.send_signal(subprocess.signal.SIGINT)
+            if self._is_terminated(timeout=20):
+                print('Info: obs was terminated by SIGINT.', flush=True)
+                return
+            print('Error: failed to wait obs. SIGINT could not terminate obs.', flush=True)
+
+        elif sys.platform == 'darwin':
+            ret = os.system(f'killall -INT OBS')
+            if ret != 0:
+                return
+            if self._is_terminated():
+                print(f'Info: OBS was terminated by killall -INT', flush=True)
+                return
+            print('Error: failed to terminate obs by killall -INT.', flush=True)
+
     def term_by_signal(self):
         if sys.platform == 'linux':
             self.proc_obs.send_signal(subprocess.signal.SIGINT)
@@ -182,18 +158,23 @@ class OBSExec:
 
 
     def term(self):
+        try:
+            # On Windows, existing connections in obs-websocket somehow block shutdown.
+            # Let's close the obsws instance before shutdown.
+            if self._obsws:
+                self._obsws.base_client.ws.close()
+                self._obsws = None
+        except:
+            pass
+
         self.config.clear_cache()
 
         if self._is_terminated(timeout=0):
             return
 
-        self.term_ws()
-
-        self.config.clear_cache()
+        self.term_by_sigint()
         if self._is_terminated():
             return
-        print('Warning: Failed to terminate obs through websocket. Trying another method...')
-        sys.stdout.flush()
 
         self.term_hotkey()
         if self._is_terminated():
