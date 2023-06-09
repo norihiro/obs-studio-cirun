@@ -53,6 +53,11 @@ sources = [
                         },
                     ],
                 },
+            'update_settings': [
+                {
+                    'randomize': True,
+                    },
+                ],
             },
         {
             'inputName': 'browser',
