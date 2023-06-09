@@ -33,5 +33,6 @@ class OBSTest(unittest.TestCase):
     def tearDown(self):
         self.obs.term()
         self.obs.config.move_logs()
+        util.macos_check_fault()
         if _is_obs_running():
             raise Exception('OBS did not exit')

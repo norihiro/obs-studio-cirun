@@ -182,18 +182,23 @@ def take_screenshot(capture=True, draw_cb=None):
 
 
 def _macos_check_fault_report():
-    click_verbose(u.find_text('Report...'))
-    sleep(3)
+    try:
+        click_verbose(u.find_text('Report...'))
+        sleep(3)
 
-    # Expect to have buttons `Show Details`, `Don't Send`, `Send to Apple`
+        # Expect to have buttons `Show Details`, `Don't Send`, `Send to Apple`
+        u.capture()
+        take_screenshot(capture=False)
+        cx = u.screenshot.width / 2
+        u.ocr(crop=(cx-256, 0, cx+256, u.screenshot.height))
+        click_verbose(u.find_text('Show Details'))
+        sleep(3)
+    except:
+        pass
+
     u.capture()
-    take_screenshot(capture=False)
-    cx = u.screenshot.width / 2
-    u.ocr(crop=(cx-256, 0, cx+256, u.screenshot.height))
-    click_verbose(u.find_text('Show Details'))
-    sleep(3)
-
-    # TODO: Navigate further
+    sleep(0.2); pyautogui.hotkey('esc')
+    sleep(0.2); pyautogui.hotkey('esc')
     u.capture()
 
 
