@@ -191,7 +191,6 @@ class OBSFilterTest(obstest.OBSTest):
                 pyautogui.hotkey('esc')
 
         with self.subTest(msg='exit and start again'):
-            cl.base_client.ws.close()
             self.assertTrue(obstest._is_obs_running())
             self.obs.term()
             self.assertFalse(obstest._is_obs_running())
