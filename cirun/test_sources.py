@@ -87,7 +87,8 @@ sources = [
                 },
             'update_settings': [
                 {
-                    'rate': 32000
+                    'rate': 32000,
+                    'device_id': '__custom__',
                     },
                 ],
             'skip': (sys.platform != 'linux')
