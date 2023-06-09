@@ -37,6 +37,9 @@ static void dstr_basic_test(void **state)
 	dstr_to_lower(&s2);
 	assert_string_equal(s2.array, "abcdef");
 
+	dstr_cat(&s2, NULL);
+	assert_string_equal(s2.array, "abcdef");
+
 	dstr_to_upper(&s2);
 	assert_string_equal(s2.array, "ABCDEF");
 
@@ -59,12 +62,17 @@ static void dstr_basic_test(void **state)
 	dstr_insert_dstr(&s2, 3, &s1);
 	assert_string_equal(s2.array, "abcdef");
 
+	assert_int_equal(dstr_cmpi(&s2, "Abcdef"), 0);
+
 	dstr_from_wcs(&s2, L"");
 	assert_ptr_equal(s2.array, NULL);
 
 	dstr_copy(&s2, " ");
 	dstr_depad(&s2);
 	assert_ptr_equal(s2.array, NULL);
+
+	dstr_init_copy_dstr(&s2, &s1);
+	assert_string_equal(s2.array, "def");
 
 	struct strref strref1 = {NULL, 0};
 	dstr_copy(&s2, "abc");
@@ -82,6 +90,17 @@ static void dstr_basic_test(void **state)
 
 	dstr_free(&s1);
 	dstr_free(&s2);
+
+	dstr_move_array(&s1, bstrdup("move_array"));
+	assert_string_equal(s1.array, "move_array");
+
+	dstr_reserve(&s1, 128);
+	assert_int_equal(s1.capacity, 128);
+
+	dstr_reserve(&s1, 0); // won't change
+	assert_int_equal(s1.capacity, 128);
+
+	dstr_free(&s1);
 
 	assert_int_equal(bnum_allocs(), 0);
 }
@@ -171,12 +190,25 @@ static void str_util_test(void **state)
 	assert_int_equal(bnum_allocs(), 0);
 }
 
+static void str_bstrdup(void **state)
+{
+	UNUSED_PARAMETER(state);
+
+	assert_ptr_equal(bstrdup(NULL), NULL);
+	assert_ptr_equal(bwstrdup(NULL), NULL);
+	assert_ptr_equal(bstrdup_n(NULL, 0), NULL);
+	assert_ptr_equal(bwstrdup_n(NULL, 0), NULL);
+
+	assert_int_equal(bnum_allocs(), 0);
+}
+
 int main()
 {
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(dstr_basic_test),
 		cmocka_unit_test(dstr_mbs_test),
 		cmocka_unit_test(str_util_test),
+		cmocka_unit_test(str_bstrdup),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
