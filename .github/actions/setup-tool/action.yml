@@ -55,7 +55,7 @@ runs:
 
         cat > wrapper.sh <<-EOF
         #! /bin/bash
-        timeout 30m xvfb-run "\$@"
+        timeout 30m xvfb-run -s '-screen 0 1080x768x24' "\$@"
         EOF
         chmod +x wrapper.sh
 
