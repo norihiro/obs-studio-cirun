@@ -6,6 +6,20 @@ on:
   schedule:
     - cron: '19 13 * * *'
   workflow_dispatch:
+    inputs:
+      tmate-at:
+        type: choice
+        description: 'Step to call tmate'
+        options:
+          - none
+          - before-first
+          - before-unittest
+          - before-upload
+        required: false
+      obs-commit:
+        description: 'Build obs-studio using this commit instead of master.'
+        type: string
+        required: false
 
 env:
   CIRUN_REFNAME: ${{ github.ref_name }}
@@ -29,8 +43,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           patch_hash: ${{ hashFiles('patch/**') }}
+          obs_commit: ${{github.event.inputs.obs-commit}}
         run: |
-          obs_hash="$(gh api /repos/obsproject/obs-studio/commits | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
+          q='per_page=1'
+          if test -n "$obs_commit"; then
+            q="${q}&sha=$obs_commit"
+          fi
+          obs_hash="$(gh api "/repos/obsproject/obs-studio/commits?$q" | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
           echo "obs_hash=$obs_hash" >> $GITHUB_OUTPUT
           echo "patch_hash=$patch_hash" >> $GITHUB_OUTPUT
 
@@ -159,6 +178,10 @@ jobs:
           obs --version
           obs --help
 
+      - name: 'tmate (optional)'
+        if: ${{ always() && github.event.inputs.tmate-at == 'before-first' }}
+        uses: mxschmitt/action-tmate@v3
+
       - name: 'Run first time'
         run: |
           ./wrapper.sh python3 cirun/firsttime.py
@@ -169,6 +192,10 @@ jobs:
           sudo nginx &
           mkdir -p screenshot
           ./wrapper.sh python3 cirun/obs-secondtime.py
+
+      - name: 'tmate (optional)'
+        if: ${{ always() && github.event.inputs.tmate-at == 'before-unittest' }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: 'Run unit tests'
         env:
@@ -214,6 +241,10 @@ jobs:
               mv -f $HOME/Library/Logs/DiagnosticReports/* logs/ || true
               ;;
           esac
+
+      - name: 'tmate (optional)'
+        if: ${{ always() && github.event.inputs.tmate-at == 'before-upload' }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: 'Upload log files'
         if: always()
