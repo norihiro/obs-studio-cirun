@@ -160,6 +160,12 @@ def set_screenshot_prefix(name):
     os.makedirs(os.path.dirname(name), exist_ok=True)
 
 
+def _save_screenshot_image(im, name):
+    with open('screenshot/screenshots.txt', 'a') as f:
+        f.write(f'{name}\n')
+    im.save(name)
+
+
 def take_screenshot(capture=True, draw_cb=None):
     global _screenshot_prefix
     global _screenshot_index
@@ -170,14 +176,14 @@ def take_screenshot(capture=True, draw_cb=None):
     name = f'{_screenshot_prefix}{_screenshot_index:02d}.png'
     print(f'Info: Saving screenshot to {name}')
     sys.stdout.flush()
-    u.screenshot.save(name)
+    _save_screenshot_image(u.screenshot, name)
     if draw_cb:
         from PIL import ImageDraw
         im = u.screenshot.copy()
         d = ImageDraw.Draw(im)
         draw_cb(d)
         name = f'{_screenshot_prefix}{_screenshot_index:02d}.d.png'
-        im.save(name)
+        _save_screenshot_image(im, name)
     _screenshot_index += 1
 
 
