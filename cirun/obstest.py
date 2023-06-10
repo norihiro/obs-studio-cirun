@@ -1,5 +1,6 @@
 import psutil
 import sys
+from time import sleep
 import unittest
 from obsexec import OBSExec
 from obsconfig import OBSConfigCopyFromSaved
@@ -34,7 +35,27 @@ class OBSTest(unittest.TestCase):
 
     def tearDown(self):
         self.obs.term()
+
+        try:
+            wait_memleak_sec = 30
+            while not self._log_has_memleak_count():
+                print(f'Warning: Cannot find "Number of memory leaks" in the log "{self.obs.get_logfile()}". Waiting...', flush=True)
+                sleep(5)
+                wait_memleak_sec -= 5
+                util.macos_check_fault()
+                if wait_memleak_sec <= 0:
+                    break
+        except TypeError:
+            pass
+
         self.obs.config.move_logs()
-        util.macos_check_fault()
         if _is_obs_running():
             raise Exception('OBS did not exit')
+
+    def _log_has_memleak_count(self):
+        with open(self.obs.get_logfile()) as f:
+            lines = f.read().split('\n')
+        for l in lines[-2:]:
+            if 'Number of memory leaks:' in l:
+                return True
+        return False

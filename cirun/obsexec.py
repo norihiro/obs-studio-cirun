@@ -233,4 +233,6 @@ class OBSExec:
     def get_logfile(self):
         logsdir = self.config.path + '/logs/'
         logs = os.listdir(logsdir)
+        if not logs:
+            return None
         return logsdir + max(logs)
