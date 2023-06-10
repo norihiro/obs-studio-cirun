@@ -28,8 +28,6 @@ class OBSProjectorTest(obstest.OBSTest):
         super().setUp(run=False)
 
     def test_open_projectors(self):
-        util.set_screenshot_prefix('screenshot/test_open_projectors-')
-
         self.obs.config.get_global()['BasicWindow']['TransitionOnDoubleClick'] = 'true'
         self.obs.config.save_global()
 

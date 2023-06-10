@@ -8,9 +8,7 @@ class OBSStatsTest(obstest.OBSTest):
     def setUp(self):
         super().setUp(run=False)
 
-    def test_volmete_vertial(self):
-        util.set_screenshot_prefix('screenshot/test_volmete_vertial-')
-
+    def test_volmeter_vertical(self):
         self.obs.config.get_global()['BasicWindow']['VerticalVolControl'] = 'true'
         self.obs.config.save_global()
 

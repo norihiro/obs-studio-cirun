@@ -15,7 +15,6 @@ class OBSPTZTest(obstest.OBSTest):
         obsplugin.uninstall_all_plugins()
 
     def test_ptz(self):
-        util.set_screenshot_prefix('screenshot/test_ptz-')
         obsplugin.download_install_plugin('glikely/obs-ptz')
 
         self.obs.run()

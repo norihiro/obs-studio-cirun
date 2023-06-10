@@ -93,7 +93,6 @@ class OBSPluginTest(obstest.OBSTest):
         self._assert_log(log, 'Number of memory leaks: 0$')
 
     def test_color_monitor(self):
-        util.set_screenshot_prefix('screenshot/test_color_monitor-')
         obsplugin.download_install_plugin('norihiro/obs-color-monitor')
 
         self.obs.run()

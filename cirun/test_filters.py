@@ -149,7 +149,6 @@ def _create_scene_with_media(cl, scene_name, source_name):
 
 class OBSFilterTest(obstest.OBSTest):
     def test_add_filters(self):
-        util.set_screenshot_prefix('screenshot/test_add_filters-')
         cl = self.obs.get_obsws()
 
         ff = []

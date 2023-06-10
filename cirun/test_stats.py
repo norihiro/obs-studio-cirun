@@ -9,7 +9,6 @@ class OBSStatsTest(obstest.OBSTest):
         super().setUp(run=False)
 
     def test_stats_at_startup(self):
-        util.set_screenshot_prefix('screenshot/test_stats_at_startup-')
         profile = self.obs.config.get_profile()
         profile['General']['OpenStatsOnStartup'] = 'true'
         profile.save()

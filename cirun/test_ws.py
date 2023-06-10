@@ -47,8 +47,6 @@ def _create_scene_with_color(cl, scene_name, source_name, color):
 
 class OBSWSTest(obstest.OBSTest):
     def test_obsws(self):
-        util.set_screenshot_prefix('screenshot/test_obsws-')
-
         cl = self.obs.get_obsws()
 
         with self.subTest(msg='batch request'):

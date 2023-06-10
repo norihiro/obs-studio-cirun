@@ -11,7 +11,6 @@ import util
 class OBSLogTest(obstest.OBSTest):
     def test_upload_current_log(self):
         u = util.u
-        util.set_screenshot_prefix('screenshot/test_upload_current_log-')
         t = util.click_verbose(u.find_text('Help'))
         util.ocr_verbose(crop=util.expand_locator(t, 200))
         t = u.find_text('Log Files')

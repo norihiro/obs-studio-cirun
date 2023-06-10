@@ -19,6 +19,8 @@ def _is_obs_running():
 
 class OBSTest(unittest.TestCase):
     def setUp(self, config_name='obs-config-default', run=True):
+        name = self.id().split('.')[-1]
+        util.set_screenshot_prefix(f'screenshot/{name}-')
         if _is_obs_running():
             raise Exception('OBS has already been running')
         self.obs = OBSExec(OBSConfigCopyFromSaved(config_name), run=run)
