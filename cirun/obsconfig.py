@@ -42,6 +42,7 @@ class OBSConfig:
         Save the current state
         name - A path to save the state into. Same name can be passed to OBSConfigCopyFromSaved.
         '''
+        self.move_logs()
         shutil.rmtree(name, ignore_errors=True)
         shutil.copytree(self.path + '/', name, symlinks=True)
 
