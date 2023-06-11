@@ -7,6 +7,7 @@ import pyautogui
 import obstest
 import util
 import ffmpeg_gen
+import obsplugin
 
 
 filters = [
@@ -114,6 +115,80 @@ filters = [
         },
 ]
 
+filters_audio = [
+        {
+            'sourceName': 'inv',
+            'filterName': 'inv',
+            'filterKind': 'invert_polarity_filter',
+            'filterSettings': {
+            },
+        },
+        {
+            'sourceName': 'gain',
+            'filterName': 'gain',
+            'filterKind': 'gain_filter',
+            'filterSettings': {
+            },
+        },
+        {
+            'sourceName': 'expander',
+            'filterName': 'expander',
+            'filterKind': 'expander_filter',
+            'filterSettings': {
+            },
+        },
+        {
+            'sourceName': 'upward-compressor',
+            'filterName': 'upward-compressor',
+            'filterKind': 'upward_compressor_filter',
+            'filterSettings': {
+            },
+        },
+        {
+            'sourceName': 'eq',
+            'filterName': 'eq',
+            'filterKind': 'basic_eq_filter',
+            'filterSettings': {
+            },
+        },
+        {
+            'sourceName': 'compressor',
+            'filterName': 'compressor',
+            'filterKind': 'compressor_filter',
+            'filterSettings': {
+            },
+        },
+        {
+            'sourceName': 'compressor-sidechain',
+            'filterName': 'compressor',
+            'filterKind': 'compressor_filter',
+            'filterSettings': {
+                'sidechain_source': 'compressor',
+            },
+        },
+        {
+            'sourceName': 'limiter',
+            'filterName': 'limiter',
+            'filterKind': 'limiter_filter',
+            'filterSettings': {
+            },
+        },
+        {
+            'sourceName': 'noise-gate',
+            'filterName': 'noise-gate',
+            'filterKind': 'noise_gate_filter',
+            'filterSettings': {
+            },
+        },
+        {
+            'sourceName': 'noise-suppress',
+            'filterName': 'noise-suppress',
+            'filterKind': 'noise_suppress_filter_v2',
+            'filterSettings': {
+            },
+        },
+]
+
 
 def _create_scene_with_color(cl, scene_name, source_name, color):
     if not source_name:
@@ -148,7 +223,15 @@ def _create_scene_with_media(cl, scene_name, source_name):
     return True
 
 class OBSFilterTest(obstest.OBSTest):
+    def setUp(self):
+        super().setUp(run=False)
+
+    def tearDown(self):
+        super().tearDown()
+        obsplugin.uninstall_all_plugins()
+
     def test_add_filters(self):
+        self.obs.run()
         cl = self.obs.get_obsws()
 
         ff = []
@@ -187,6 +270,39 @@ class OBSFilterTest(obstest.OBSTest):
                 cl.send('SetCurrentProgramScene', {'sceneName': 'Scene ' + f['sourceName']})
                 cl.send('OpenInputFiltersDialog', {'inputName': f['sourceName']})
                 util.take_screenshot()
+                pyautogui.hotkey('esc')
+
+        with self.subTest(msg='exit and start again'):
+            self.assertTrue(obstest._is_obs_running())
+            self.obs.term()
+            self.assertFalse(obstest._is_obs_running())
+            self.obs.run()
+            self.assertTrue(obstest._is_obs_running())
+
+    def test_filters_audio(self):
+        obsplugin.download_install_plugin('norihiro/obs-asynchronous-audio-source')
+        self.obs.run()
+        cl = self.obs.get_obsws()
+
+        ff = []
+        for f in filters_audio:
+            name = f['sourceName']
+            with self.subTest(filterKind=f['filterKind']):
+                cl.send('CreateInput', {
+                    'inputName': name,
+                    'sceneName': 'Scene',
+                    'inputKind': 'net.nagater.obs.' + 'asynchronous-audio-source',
+                    'inputSettings': {
+                        'rate': 48000,
+                    },
+                })
+                cl.send('CreateSourceFilter', f)
+                ff.append(f)
+                # TODO: Check volume
+
+        with self.subTest(msg='open setting dialogs'):
+            for f in ff:
+                cl.send('OpenInputFiltersDialog', {'inputName': f['sourceName']})
                 pyautogui.hotkey('esc')
 
         with self.subTest(msg='exit and start again'):
