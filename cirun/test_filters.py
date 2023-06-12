@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import re
 from time import sleep
 import unittest
 import pyautogui
@@ -222,6 +223,34 @@ def _create_scene_with_media(cl, scene_name, source_name):
     })
     return True
 
+
+def _version_down(scenes):
+    v_re = re.compile(r'_v[1-9][0-9]*$')
+    ret = []
+    for s in scenes['sources']:
+        if 'filters' not in s:
+            continue
+        for f in s['filters']:
+            versioned_id = f['versioned_id']
+            m = re.search(v_re, versioned_id)
+            if not m:
+                continue
+            version = int(versioned_id[m.start() + 2:]) - 1
+            if version > 1:
+                versioned_id_new = versioned_id[:m.start()] + f'_v{version}'
+            else:
+                versioned_id_new = versioned_id[:m.start()]
+            print(f'Info: changing {versioned_id} to {versioned_id_new}', flush=True)
+            f['versioned_id'] = versioned_id_new
+            ret.append({
+                'inputName': s['name'],
+                'filterName': f['name'],
+            })
+    if ret:
+        scenes.save()
+    return ret
+
+
 class OBSFilterTest(obstest.OBSTest):
     def setUp(self):
         super().setUp(run=False)
@@ -279,6 +308,27 @@ class OBSFilterTest(obstest.OBSTest):
             self.obs.run()
             self.assertTrue(obstest._is_obs_running())
 
+        self.obs.term()
+        self.assertFalse(obstest._is_obs_running())
+
+        version_down = 0
+        while True:
+            modified = _version_down(self.obs.config.get_scenecollection())
+            if not modified:
+                break;
+            version_down += 1
+            with self.subTest(msg=f'version_down {version_down}'):
+                self.obs.run()
+                self.assertTrue(obstest._is_obs_running())
+                cl = self.obs.get_obsws()
+                for m in modified:
+                    cl.send('SetCurrentProgramScene', {'sceneName': 'Scene ' + f['sourceName']})
+                    cl.send('OpenInputFiltersDialog', m)
+                    sleep(0.5)
+                    pyautogui.hotkey('esc')
+                self.obs.term()
+                self.assertFalse(obstest._is_obs_running())
+
     def test_filters_audio(self):
         obsplugin.download_install_plugin('norihiro/obs-asynchronous-audio-source')
         self.obs.run()
@@ -311,6 +361,27 @@ class OBSFilterTest(obstest.OBSTest):
             self.assertFalse(obstest._is_obs_running())
             self.obs.run()
             self.assertTrue(obstest._is_obs_running())
+            self.obs.term()
+            self.assertFalse(obstest._is_obs_running())
+
+        self.assertFalse(obstest._is_obs_running())
+
+        version_down = 0
+        while True:
+            modified = _version_down(self.obs.config.get_scenecollection())
+            if not modified:
+                break;
+            version_down += 1
+            with self.subTest(msg=f'version_down {version_down}'):
+                self.obs.run()
+                self.assertTrue(obstest._is_obs_running())
+                cl = self.obs.get_obsws()
+                for m in modified:
+                    cl.send('OpenInputFiltersDialog', m)
+                    sleep(0.5)
+                    pyautogui.hotkey('esc')
+                self.obs.term()
+                self.assertFalse(obstest._is_obs_running())
 
 
 if __name__ == '__main__':
