@@ -250,13 +250,19 @@ class OBSSourceTest(obstest.OBSTest):
             self.obs.run()
             self.assertTrue(obstest._is_obs_running())
 
+        with self.subTest(msg='text from file'):
             cl = self.obs.get_obsws()
             cl.send('SetInputSettings', {
                 'inputName': 'text',
                 'inputSettings': {
                     'from_file': True,
-                    'log_mode': True,
                     'text_file': self.obs.get_logfile(),
+                }
+            })
+            cl.send('SetInputSettings', {
+                'inputName': 'text',
+                'inputSettings': {
+                    'log_mode': True,
                 }
             })
 
