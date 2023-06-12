@@ -188,6 +188,13 @@ filters_audio = [
             'filterSettings': {
             },
         },
+        {
+            'sourceName': 'vst',
+            'filterName': 'vst',
+            'filterKind': 'vst_filter',
+            'filterSettings': {
+            },
+        },
 ]
 
 
