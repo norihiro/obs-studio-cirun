@@ -147,6 +147,14 @@ sources = [
             'skip': (sys.platform != 'darwin')
             },
         {
+            'inputName': 'syphon',
+            'sceneName': 'Syphon Input',
+            'inputKind': 'syphon-input',
+            'inputSettings': {
+                },
+            'skip': (sys.platform != 'darwin')
+            },
+        {
             'inputName': 'media',
             'sceneName': 'Media',
             'inputKind': 'ffmpeg_source',
