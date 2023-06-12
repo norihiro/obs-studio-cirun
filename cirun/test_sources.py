@@ -202,7 +202,6 @@ def _version_down(scenes):
 
 class OBSSourceTest(obstest.OBSTest):
     def test_add_remove_sources(self):
-        util.set_screenshot_prefix('screenshot/test_add_remove_sources-')
         cl = self.obs.get_obsws()
         cl.set_studio_mode_enabled(True)
         input_kinds = cl.send('GetInputKindList').input_kinds
@@ -277,6 +276,7 @@ class OBSSourceTest(obstest.OBSTest):
         with self.subTest(msg='interact'):
             cl = self.obs.get_obsws()
             cl.send('OpenInputInteractDialog', {'inputName': 'browser'})
+            util.take_screenshot() # TODO: Input some interactions
 
         self.obs.term()
         self.assertFalse(obstest._is_obs_running())
