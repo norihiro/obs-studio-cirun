@@ -8,6 +8,7 @@ import shutil
 import string
 import random
 import configparser
+import json
 
 
 def _get_config_dir():
@@ -111,6 +112,11 @@ class OBSConfig:
             name = self.get_global()['Basic']['ProfileDir']
         return OBSProfile(self.path + '/basic/profiles/' + name)
 
+    def get_scenecollection(self, name=None):
+        if not name:
+            name = self.get_global()['Basic']['SceneCollectionFile']
+        return OBSSceneCollection(self.path + '/basic/scenes/' + name)
+
 
 class OBSConfigClean(OBSConfig):
     '''
@@ -181,3 +187,24 @@ class OBSProfile:
         config = self.get_basic()
         with open(self.path + '/basic.ini', 'w') as f:
             config.write(f, space_around_delimiters=False)
+
+
+class OBSSceneCollection:
+    def __init__(self, path=None):
+        self.path = path + '.json'
+        self._config = None
+
+    def load(self):
+        with open(self.path) as f:
+            self._config = json.load(f)
+
+    def __getitem__(self, section):
+        if not self._config:
+            self.load()
+        return self._config[section]
+
+    def save(self):
+        if not self._config:
+            return
+        with open(self.path, 'w') as f:
+            json.dump(self._config, f)
