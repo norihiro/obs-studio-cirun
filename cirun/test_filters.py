@@ -114,6 +114,13 @@ filters = [
             'sleep_after_creation': 4,
             'sleep_after_update': 4,
         },
+        {
+            'sourceName': 'tonemap',
+            'filterName': 'tonemap',
+            'filterKind': 'hdr_tonemap_filter',
+            'filterSettings': {
+            },
+        },
 ]
 
 filters_audio = [
