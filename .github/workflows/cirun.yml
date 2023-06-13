@@ -178,6 +178,18 @@ jobs:
           obs --version
           obs --help
 
+      - name: 'Extra unit-tests in C'
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          artifact="$PWD/.artifact/$CIRUN_REFNAME/${obs_hash}/${RUNNER_OS}-test-extras/"
+          mkdir -p $artifact
+          cd test-extras
+          cmake -B build
+          cd build
+          make -j4
+          ../../wrapper.sh make test
+          lcov --exclude '*/obs-studio-cirun/test-extras/*' -c -d . -o $artifact/lcov.info
+
       - name: 'tmate (optional)'
         if: ${{ always() && github.event.inputs.tmate-at == 'before-first' }}
         uses: mxschmitt/action-tmate@v3
