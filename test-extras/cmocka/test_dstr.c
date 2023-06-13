@@ -4,6 +4,7 @@
 #include <cmocka.h>
 
 #include <util/dstr.h>
+#include <util/lexer.h>
 
 static void dstr_basic_test(void **state)
 {
@@ -35,6 +36,49 @@ static void dstr_basic_test(void **state)
 	dstr_cat(&s2, "DEF");
 	dstr_to_lower(&s2);
 	assert_string_equal(s2.array, "abcdef");
+
+	dstr_to_upper(&s2);
+	assert_string_equal(s2.array, "ABCDEF");
+
+	dstr_replace(&s2, "CD", NULL);
+	assert_string_equal(s2.array, "ABEF");
+
+	dstr_remove(&s2, 2, 2);
+	assert_string_equal(s2.array, "AB");
+
+	dstr_remove(&s2, 0, 2);
+	assert_ptr_equal(s2.array, NULL);
+
+	dstr_insert_ch(&s2, 0, 'a');
+	assert_string_equal(s2.array, "a");
+
+	dstr_insert(&s2, 1, "bc");
+	assert_string_equal(s2.array, "abc");
+
+	dstr_copy(&s1, "def");
+	dstr_insert_dstr(&s2, 3, &s1);
+	assert_string_equal(s2.array, "abcdef");
+
+	dstr_from_wcs(&s2, L"");
+	assert_ptr_equal(s2.array, NULL);
+
+	dstr_copy(&s2, " ");
+	dstr_depad(&s2);
+	assert_ptr_equal(s2.array, NULL);
+
+	struct strref strref1 = {NULL, 0};
+	dstr_copy(&s2, "abc");
+	dstr_copy_strref(&s2, &strref1);
+	assert_ptr_equal(s2.array, NULL);
+
+	dstr_safe_printf(&s1, "$1 $2 $3 $4", "val1", "val2", "val3", "val4");
+	assert_string_equal(s1.array, "val1 val2 val3 val4");
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+	dstr_printf(&s1, "%-1"); // vsnprintf will return negative value.
+	dstr_catf(&s1, "%-1"); // vsnprintf will return negative value.
+#pragma GCC diagnostic pop
 
 	dstr_free(&s1);
 	dstr_free(&s2);

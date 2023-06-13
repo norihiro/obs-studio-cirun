@@ -36,4 +36,8 @@ set_property(TEST test-bmem-brealloc-0 PROPERTY PASS_REGULAR_EXPRESSION "Allocat
 add_test(NAME test-bmem-brealloc-large COMMAND ./test-bmem brealloc-large)
 set_property(TEST test-bmem-brealloc-large PROPERTY PASS_REGULAR_EXPRESSION "Out of memory while trying to allocate")
 
+add_executable(list-plugins list-plugins.c module_has_qt.c)
+target_link_libraries(list-plugins OBS::libobs)
+add_test(NAME list-plugins COMMAND ./list-plugins)
+
 add_subdirectory(cmocka)
