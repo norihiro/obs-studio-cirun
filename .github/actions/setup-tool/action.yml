@@ -51,10 +51,9 @@ runs:
         }
         EOF
 
-        pulseaudio --start
-
         cat > wrapper.sh <<-EOF
         #! /bin/bash
+        pulseaudio --start
         timeout 30m xvfb-run -s '-screen 0 1080x768x24' "\$@"
         EOF
         chmod +x wrapper.sh
