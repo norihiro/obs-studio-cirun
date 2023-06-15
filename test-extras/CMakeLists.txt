@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 
+if(DEFINED OBS_SOURCE_DIR)
+	include_directories(BEFORE SYSTEM ${OBS_SOURCE_DIR}/libobs)
+endif()
+
 project(obs-studio-test-extras)
 enable_testing()
 

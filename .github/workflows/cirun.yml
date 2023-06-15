@@ -184,7 +184,8 @@ jobs:
           artifact="$PWD/.artifact/$CIRUN_REFNAME/${obs_hash}/${RUNNER_OS}-test-extras/"
           mkdir -p $artifact
           cd test-extras
-          cmake -B build
+          cmake -B build \
+            -DOBS_SOURCE_DIR=$(cd ../obs-studio && pwd)
           cd build
           make -j4
           ../../wrapper.sh make test
