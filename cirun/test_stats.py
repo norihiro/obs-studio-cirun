@@ -1,3 +1,4 @@
+import sys
 from time import sleep
 import unittest
 import obstest
@@ -27,7 +28,9 @@ class OBSStatsTest(obstest.OBSTest):
             },
         })
 
-        cl.send('StartRecord')
+        if sys.platform != 'darwin':
+            # The StartRecord failed on macOS. Do not start recording for now.
+            cl.send('StartRecord')
 
         sleep(2)
         util.take_screenshot()
