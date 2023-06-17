@@ -369,6 +369,29 @@ class OBSFilterTest(obstest.OBSTest):
                 cl.send('OpenInputFiltersDialog', {'inputName': f['sourceName']})
                 pyautogui.hotkey('esc')
 
+        with self.subTest(msg='change sidechain'):
+            cl.send('CreateInput', {
+                'inputName': 'sidechain-src-1',
+                'sceneName': 'Scene',
+                'inputKind': 'net.nagater.obs.' + 'asynchronous-audio-source',
+                'inputSettings': {
+                    'rate': 44100,
+                    },
+                })
+            cl.send('SetSourceFilterSettings', {
+                'sourceName': 'compressor-sidechain',
+                'filterName': 'compressor',
+                'filterSettings': {'sidechain_source': 'sidechain-src-1'},
+            })
+            sleep(0.5)
+            cl.send('RemoveInput', {'inputName': 'sidechain-src-1'})
+            sleep(0.5)
+            cl.send('SetSourceFilterSettings', {
+                'sourceName': 'compressor-sidechain',
+                'filterName': 'compressor',
+                'filterSettings': {'sidechain_source': 'compressor'},
+            })
+
         with self.subTest(msg='exit and start again'):
             self.assertTrue(obstest._is_obs_running())
             self.obs.term()
