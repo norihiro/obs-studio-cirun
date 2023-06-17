@@ -35,3 +35,8 @@ add_executable(test_config test_config.c)
 target_include_directories(test_config PRIVATE ${CMOCKA_INCLUDE_DIR})
 target_link_libraries(test_config PRIVATE OBS::libobs ${CMOCKA_LIBRARIES})
 add_test(test_config ${CMAKE_CURRENT_BINARY_DIR}/test_config)
+
+add_executable(test_mediaio test_mediaio.c)
+target_include_directories(test_mediaio PRIVATE ${CMOCKA_INCLUDE_DIR})
+target_link_libraries(test_mediaio PRIVATE OBS::libobs ${CMOCKA_LIBRARIES})
+add_test(test_mediaio ${CMAKE_CURRENT_BINARY_DIR}/test_mediaio)
