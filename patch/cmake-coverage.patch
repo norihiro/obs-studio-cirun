@@ -19,16 +19,14 @@ index 849d19de7..13198d1e7 100644
    if(MINGW)
      set(CMAKE_WIDL
          "widl"
-diff --git a/cmake/macos/compilerconfig.cmake b/cmake/macos/compilerconfig.cmake
-index 987ea0923..5cb189e06 100644
---- a/cmake/macos/compilerconfig.cmake
-+++ b/cmake/macos/compilerconfig.cmake
-@@ -71,3 +71,8 @@ if(NOT XCODE)
- endif()
- 
- add_compile_definitions("$<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<CONFIG:DEBUG>>:DEBUG;_DEBUG>")
+diff --git a/cmake/macos/xcode.cmake b/cmake/macos/xcode.cmake
+index dd304a2b4..f662691e1 100644
+--- a/cmake/macos/xcode.cmake
++++ b/cmake/macos/xcode.cmake
+@@ -160,3 +160,6 @@ set(CMAKE_COLOR_DIAGNOSTICS TRUE)
+ set(CMAKE_SKIP_RPATH TRUE)
+ # Have Xcode set default RPATH entries
+ set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks")
 +
-+if(XCODE)
-+  add_compile_options(-fprofile-arcs -ftest-coverage)
-+  add_link_options(--coverage)
-+endif()
++add_compile_options(-fprofile-arcs -ftest-coverage)
++add_link_options(--coverage)
