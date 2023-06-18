@@ -45,10 +45,9 @@ jobs:
           patch_hash: ${{ hashFiles('patch/**') }}
           obs_commit: ${{github.event.inputs.obs-commit}}
         run: |
+          set -x
           q='per_page=1'
-          if test -n "$obs_commit"; then
-            q="${q}&sha=$obs_commit"
-          fi
+          q="${q}&sha=6dda385"
           obs_hash="$(gh api "/repos/obsproject/obs-studio/commits?$q" | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
           echo "obs_hash=$obs_hash" >> $GITHUB_OUTPUT
           echo "patch_hash=$patch_hash" >> $GITHUB_OUTPUT
@@ -57,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-22.04', 'macos-12', 'windows-2022']
+        os: ['windows-2022']
     runs-on: ${{ matrix.os }}
     needs: [setup_job]
     defaults:
@@ -119,7 +118,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api "https://api.github.com/repos/obsproject/obs-studio/actions/artifacts?name=obs-studio-windows-x64-$obs_hash" > artifact.json
+          gh api "https://api.github.com/repos/norihiro/obs-studio/actions/artifacts?name=obs-studio-windows-x64-$obs_hash" > artifact.json
           gh api "$(jq '.["artifacts"][0]["archive_download_url"]' < artifact.json | tr -d '"')" > a.zip
           7z x a.zip
           7z x -oobs-studio obs-studio-*-windows-x64.zip
