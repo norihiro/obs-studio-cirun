@@ -58,16 +58,6 @@ class OBSProjectorTest(obstest.OBSTest):
             util.take_screenshot()
             self._close_projector()
 
-        with self.subTest(msg='multiview'):
-            cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW', 'monitorIndex': 0})
-            util.take_screenshot()
-
-            for i in range(8):
-                self._click_random(method=pyautogui.click)
-                util.take_screenshot()
-                pyautogui.doubleClick()
-                util.take_screenshot()
-
         with self.subTest(msg='always-on-top'):
             util.take_screenshot()
             pyautogui.rightClick()
@@ -101,6 +91,40 @@ class OBSProjectorTest(obstest.OBSTest):
         cx = int(random.uniform(4, util.u.screenshot.width - 4))
         cy = int(random.uniform(util.u.screenshot.height / 2, util.u.screenshot.height - 4))
         method((cx, cy))
+
+    def test_all_multiview_layouts(self):
+        self.obs.config.get_global()['BasicWindow']['TransitionOnDoubleClick'] = 'true'
+
+        with self.subTest(msg=f'multiview-setup'):
+            self.obs.run()
+            cl = self.obs.get_obsws()
+            for i in range(0, 25):
+                _create_scene_with_color(cl, f'Scene {i}', None, int(random.uniform(0xFF000000, 0xFFFFFFFF)))
+            cl.send('SetStudioModeEnabled', {'studioModeEnabled': True})
+            cl.send('RemoveScene', {'sceneName': 'Scene'})
+            util.take_screenshot()
+            self.obs.term()
+            self.assertFalse(obstest._is_obs_running())
+
+        for multiview_layout in range(0, 10):
+            with self.subTest(msg=f'multiview-{multiview_layout}'):
+                self.assertFalse(obstest._is_obs_running())
+                self.obs.config.get_global()['BasicWindow']['MultiviewLayout'] = f'{multiview_layout}'
+                self.obs.config.save_global()
+
+                self.obs.run()
+                cl = self.obs.get_obsws()
+                cl.send('OpenVideoMixProjector', {'videoMixType': 'OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW', 'monitorIndex': 0})
+
+                for i in range(8):
+                    self._click_random(method=pyautogui.click)
+                    if i == 7:
+                        util.take_screenshot()
+                    pyautogui.doubleClick()
+
+
+                self.obs.term()
+                self.assertFalse(obstest._is_obs_running())
 
 
 if __name__ == '__main__':
