@@ -67,6 +67,21 @@ sources = [
                 ],
             },
         {
+            'inputName': 'gif-image',
+            'sceneName': 'GIF Image',
+            'inputKind': 'image_source',
+            'inputSettings': {
+                    'file': ffmpeg_gen.lavfi_testsrc_gif(),
+                    'linear_alpha': True,
+                },
+            'sleep_after_creation': 9,
+            'update_settings': [
+                {
+                    'linear_alpha': False,
+                    },
+                ],
+            },
+        {
             'inputName': 'browser',
             'sceneName': 'Scene Browser',
             'inputKind': 'browser_source',
