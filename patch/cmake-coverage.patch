@@ -23,10 +23,13 @@ diff --git a/cmake/macos/xcode.cmake b/cmake/macos/xcode.cmake
 index dd304a2b4..f662691e1 100644
 --- a/cmake/macos/xcode.cmake
 +++ b/cmake/macos/xcode.cmake
-@@ -160,3 +160,6 @@ set(CMAKE_COLOR_DIAGNOSTICS TRUE)
+@@ -160,3 +160,9 @@ set(CMAKE_COLOR_DIAGNOSTICS TRUE)
  set(CMAKE_SKIP_RPATH TRUE)
  # Have Xcode set default RPATH entries
  set(CMAKE_XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks")
 +
-+add_compile_options(-fprofile-arcs -ftest-coverage)
++add_compile_options(
++  $<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-fprofile-arcs>
++  $<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-ftest-coverage>
++)
 +add_link_options(--coverage)
