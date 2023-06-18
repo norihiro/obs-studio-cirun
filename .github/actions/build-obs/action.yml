@@ -57,7 +57,7 @@ runs:
         for p in ../patch/*.patch; do
           patch -p1 < $p
         done
-        rm -rf build_x86_64/OBS.app
+        rm -rf build_macos/OBS.app
         export -n SEEKING_TESTERS
         export TERM=''
         export -n CI

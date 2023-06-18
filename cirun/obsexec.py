@@ -26,7 +26,7 @@ class OBSExec:
         if sys.platform == 'linux':
             self.proc_obs = subprocess.Popen(['obs'])
         elif sys.platform == 'darwin':
-            self.proc_obs = subprocess.Popen(['open', '-W', 'obs-studio/build_x86_64/UI/RelWithDebInfo/OBS.app'])
+            self.proc_obs = subprocess.Popen(['open', '-W', 'obs-studio/build_macos/UI/RelWithDebInfo/OBS.app'])
         elif sys.platform == 'win32':
             oldcwd = os.getcwd()
             os.chdir('obs-studio/bin/64bit')
