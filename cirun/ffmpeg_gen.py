@@ -50,6 +50,26 @@ def lavfi_testsrc2(ext=None):
     return fname
 
 
+def lavfi_testsrc_gif():
+    fname = os.path.abspath(cache_path + 'lavfi_testsrc.gif')
+    if _is_exist(fname):
+        return fname
+
+    if not _has_ffmpeg:
+        return None
+
+    os.makedirs(cache_path, exist_ok=True)
+
+    p = subprocess.Popen([
+        'ffmpeg',
+        '-loglevel', 'error',
+        '-f', 'lavfi', '-i', 'testsrc=d=6:size=256x192',
+        fname])
+    p.wait()
+
+    return fname
+
+
 if __name__ == '__main__':
     import sys
     for a in sys.argv[1:]:
