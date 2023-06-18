@@ -106,11 +106,22 @@ class OBSProjectorTest(obstest.OBSTest):
             self.obs.term()
             self.assertFalse(obstest._is_obs_running())
 
-        for multiview_layout in range(0, 10):
+        def _cases():
+            for portrait in (False, True):
+                for multiview_layout in range(0, 10):
+                    yield (portrait, multiview_layout)
+
+        for portrait, multiview_layout in _cases():
             with self.subTest(msg=f'multiview-{multiview_layout}'):
                 self.assertFalse(obstest._is_obs_running())
                 self.obs.config.get_global()['BasicWindow']['MultiviewLayout'] = f'{multiview_layout}'
                 self.obs.config.save_global()
+                profile = self.obs.config.get_profile()
+                profile['Video']['BaseCX'] = '480' if portrait else '1280'
+                profile['Video']['BaseCY'] = '720'
+                profile['Video']['OutputCX'] = '480' if portrait else '1280'
+                profile['Video']['OutputCY'] = '720'
+                profile.save()
 
                 self.obs.run()
                 cl = self.obs.get_obsws()
