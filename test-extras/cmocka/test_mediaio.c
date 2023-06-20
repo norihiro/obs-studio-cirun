@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
@@ -6,6 +7,7 @@
 #include <obs.h>
 #include <media-io/video-frame.h>
 #include <media-io/video-scaler.h>
+#include <media-io/format-conversion.h>
 #include <media-io/media-remux.h>
 #include <media-io/audio-io.h>
 
@@ -172,6 +174,120 @@ static void audio_io_test(void **state)
 	assert_int_equal(bnum_allocs(), 0);
 }
 
+static void rand_data(uint8_t *data, size_t size)
+{
+	for (size_t i = 0; i < size; i++)
+		data[i] = rand() / (RAND_MAX / 256);
+}
+
+static void replace_vuyx_with_uyvx(struct video_frame *frame, size_t height)
+{
+	const size_t width = frame->linesize[0] / 4;
+	for (size_t y = 0; y < height; y++) {
+		uint32_t *data = (uint32_t *)(frame->data[0] + y * frame->linesize[0]);
+		for (size_t x = 0; x < width; x++) {
+			uint32_t xyuv = data[x];
+			uint32_t xvyu = ((xyuv & 0xFF0000) >> 8) | ((xyuv & 0xFF) << 16) | ((xyuv & 0xFF00) >> 8);
+			data[x] = xvyu;
+		}
+	}
+}
+
+static void replace_yuvx_with_uyvx(struct video_frame *frame, size_t height)
+{
+	const size_t width = frame->linesize[0] / 4;
+	for (size_t y = 0; y < height; y++) {
+		uint32_t *data = (uint32_t *)(frame->data[0] + y * frame->linesize[0]);
+		for (size_t x = 0; x < width; x++) {
+			uint32_t xvuy = data[x];
+			uint32_t xvyu = ((xvuy & 0xFF) << 8) | ((xvuy & 0xFF00) >> 8) | ((xvuy & 0xFF0000));
+			data[x] = xvyu;
+		}
+	}
+}
+
+static bool comp_data(const uint8_t *data1, const uint8_t *data2, size_t size)
+{
+	int diff_max = 0;
+	for (size_t i = 0; i < size; i++) {
+		int diff = (int)data1[i] - data2[i];
+		// printf("comp_data i=%d data1=%x dat2=%x diff=%d\n", i, data1[i], data2[i], diff);
+		if (diff > diff_max)
+			diff_max = diff;
+		else if (-diff > diff_max)
+			diff_max = -diff;
+	}
+	return diff_max < 2;
+}
+
+static void frame_format_conversion_test_420(void **state)
+{
+	UNUSED_PARAMETER(state);
+
+	const size_t width = 64;
+	const size_t height = 48;
+
+	struct video_frame frame0, frame1, frame2;
+	size_t size;
+
+	video_frame_init(&frame0, VIDEO_FORMAT_I420, width, height);
+	video_frame_init(&frame1, VIDEO_FORMAT_AYUV, width, height);
+	video_frame_init(&frame2, VIDEO_FORMAT_I420, width, height);
+	size = width * height * (4 + 1 + 1) / 4;
+	rand_data(frame0.data[0], size);
+
+	// I420 -> VUYX
+	// TODO: the output format is not documented.
+	decompress_420((const uint8_t *const *)frame0.data, frame0.linesize, 0, height, frame1.data[0],
+		       frame1.linesize[0]);
+
+	replace_vuyx_with_uyvx(&frame1, height);
+
+	compress_uyvx_to_i420(frame1.data[0], frame1.linesize[0], 0, height, frame2.data, frame2.linesize);
+
+	assert_true(comp_data(frame0.data[0], frame2.data[0], size));
+
+	video_frame_free(&frame2);
+	video_frame_free(&frame1);
+	video_frame_free(&frame0);
+
+	assert_int_equal(bnum_allocs(), 0);
+}
+
+static void frame_format_conversion_test_nv12(void **state)
+{
+	UNUSED_PARAMETER(state);
+
+	const size_t width = 64;
+	const size_t height = 48;
+
+	struct video_frame frame0, frame1, frame2;
+	size_t size;
+
+	video_frame_init(&frame0, VIDEO_FORMAT_NV12, width, height);
+	video_frame_init(&frame1, VIDEO_FORMAT_AYUV, width, height);
+	video_frame_init(&frame2, VIDEO_FORMAT_NV12, width, height);
+	size = width * height * (2 + 1) / 2;
+	rand_data(frame0.data[0], size);
+
+	// NV12 -> YUVX
+	// TODO: the output format is not documented.
+	decompress_nv12((const uint8_t *const *)frame0.data, frame0.linesize, 0, height, frame1.data[0],
+			frame1.linesize[0]);
+
+	replace_yuvx_with_uyvx(&frame1, height);
+
+	compress_uyvx_to_nv12(frame1.data[0], frame1.linesize[0], 0, height, frame2.data, frame2.linesize);
+
+	assert_true(comp_data(frame0.data[0], frame2.data[0], size));
+
+	video_frame_free(&frame2);
+	video_frame_free(&frame1);
+	video_frame_free(&frame0);
+
+	assert_int_equal(bnum_allocs(), 0);
+}
+
 int main()
 {
 	const struct CMUnitTest tests[] = {
@@ -180,6 +296,8 @@ int main()
 		cmocka_unit_test(videoscaler_errors),
 		cmocka_unit_test(frame_rate),
 		cmocka_unit_test(audio_io_test),
+		cmocka_unit_test(frame_format_conversion_test_420),
+		cmocka_unit_test(frame_format_conversion_test_nv12),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);
