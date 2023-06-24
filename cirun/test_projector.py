@@ -122,7 +122,6 @@ class OBSProjectorTest(obstest.OBSTest):
                         util.take_screenshot()
                     pyautogui.doubleClick()
 
-
                 self.obs.term()
                 self.assertFalse(obstest._is_obs_running())
 
