@@ -156,6 +156,30 @@ class OBSExec:
             except:
                 pass
 
+    @classmethod
+    def killall_obs(cls):
+        if sys.platform == 'linux':
+            for cmd in ('killall -s SIGINT', 'killall -s SIGKILL'):
+                ret = os.system(f'{cmd} obs')
+                if ret != 0:
+                    return
+                sleep(2)
+
+        elif sys.platform == 'darwin':
+            for cmd in ('killall -INT', 'killall'):
+                retry = 2
+                while retry > 0:
+                    ret = os.system(f'{cmd} OBS')
+                    if ret != 0:
+                        return
+                    retry -= 1
+                    sleep(2)
+
+        elif sys.platform == 'win32':
+            try:
+                os.system('taskkill.exe /IM obs64.exe')
+            except:
+                pass
 
     def term(self):
         try:

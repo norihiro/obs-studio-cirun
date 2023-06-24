@@ -20,6 +20,9 @@ def _is_obs_running():
 
 class OBSTest(unittest.TestCase):
     def setUp(self, config_name='obs-config-default', run=True):
+        if _is_obs_running():
+            print('OBS has already been running. Killing it...')
+            OBSExec.killall_obs()
         name = self.id().split('.')[-1]
         if name[:5] == 'test_':
             name = name[5:]
