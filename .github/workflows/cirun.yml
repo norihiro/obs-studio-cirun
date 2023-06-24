@@ -234,6 +234,7 @@ jobs:
             --exclude '*/obs-outputs/librtmp/*' \
             --exclude '*/rnnoise/src/*' \
             -q \
+            --ignore-errors inconsistent \
             -c -d . -o ../artifact/lcov.info &&
           genhtml -q ../artifact/lcov.info -o ../artifact/coverage/
           cd -
