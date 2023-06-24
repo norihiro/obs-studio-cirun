@@ -45,3 +45,8 @@ add_executable(test_data test_data.c)
 target_include_directories(test_data PRIVATE ${CMOCKA_INCLUDE_DIR})
 target_link_libraries(test_data PRIVATE OBS::libobs ${CMOCKA_LIBRARIES})
 add_test(test_data ${CMAKE_CURRENT_BINARY_DIR}/test_data)
+
+add_executable(test_callback test_callback.c)
+target_include_directories(test_callback PRIVATE ${CMOCKA_INCLUDE_DIR})
+target_link_libraries(test_callback PRIVATE OBS::libobs ${CMOCKA_LIBRARIES})
+add_test(test_callback ${CMAKE_CURRENT_BINARY_DIR}/test_callback)
