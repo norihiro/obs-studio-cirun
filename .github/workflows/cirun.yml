@@ -218,9 +218,17 @@ jobs:
 
       - name: 'Gather coverage and log files'
         if: ${{ always() && runner.os != 'Windows' }}
+        env:
+          RUNNER_OS: ${{ runner.os }}
         run: |
           set +e
           cd obs-studio
+          case "$RUNNER_OS" in
+            macOS)
+              lcov_opt=(--ignore-errors inconsistent,gcov,unused);;
+            *)
+              lcov_opt=();;
+          esac
           lcov \
             --exclude '/usr/*' \
             --exclude '/Applications/*' \
@@ -234,7 +242,7 @@ jobs:
             --exclude '*/obs-outputs/librtmp/*' \
             --exclude '*/rnnoise/src/*' \
             -q \
-            --ignore-errors inconsistent \
+            "${lcov_opt[@]}" \
             -c -d . -o ../artifact/lcov.info &&
           genhtml -q ../artifact/lcov.info -o ../artifact/coverage/
           cd -
