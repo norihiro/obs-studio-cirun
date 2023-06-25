@@ -240,6 +240,9 @@ def download_install_plugin(repo_name):
     This function will automatically detect the platform.
     repo_name - owner/repo on github.com to download and install.
     '''
+    if 'CIRUN_SKIP_PLUGIN_INSTALL' in os.environ:
+        return
+
     import sys
     if sys.platform == 'darwin':
         return download_install_plugin_macos(repo_name)
