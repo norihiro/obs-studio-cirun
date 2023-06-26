@@ -13,26 +13,25 @@ static void calldata_basic_test(void **state)
 {
 	UNUSED_PARAMETER(state);
 
-	struct calldata cd;
-	calldata_init(&cd);
+	struct calldata *cd = calldata_create();
 
-	assert_false(calldata_get_data(&cd, "not-found", NULL, 0));
+	assert_false(calldata_get_data(cd, "not-found", NULL, 0));
 
-	calldata_set_string(&cd, "string1", "1");
-	calldata_set_string(&cd, "string2", "2");
+	calldata_set_string(cd, "string1", "1");
+	calldata_set_string(cd, "string2", "2");
 
-	calldata_free(&cd);
+	calldata_free(cd);
 
-	calldata_init(&cd);
-	calldata_set_string(&cd, "string1", "short"); // 128 bytes will be allocated as the default.
+	calldata_init(cd);
+	calldata_set_string(cd, "string1", "short"); // 128 bytes will be allocated as the default.
 
 	char data[512] = {0};
-	calldata_set_data(&cd, "data1", data, sizeof(data));
+	calldata_set_data(cd, "data1", data, sizeof(data));
 
-	assert_true(calldata_get_data(&cd, "data1", data, sizeof(data)));
-	assert_false(calldata_get_data(&cd, "data1", data, sizeof(data) / 2));
+	assert_true(calldata_get_data(cd, "data1", data, sizeof(data)));
+	assert_false(calldata_get_data(cd, "data1", data, sizeof(data) / 2));
 
-	calldata_free(&cd);
+	calldata_destroy(cd);
 
 	assert_int_equal(bnum_allocs(), 0);
 }
