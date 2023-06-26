@@ -224,6 +224,12 @@ class OBSSourceTest(obstest.OBSTest):
                 if sceneName != background_source:
                     cl.send('CreateSceneItem', {'sceneName': sceneName, 'sourceName': background_source})
                 cl.send('CreateInput', source)
+                scene_item_id = cl.send('GetSceneItemId', {'sceneName': sceneName, 'sourceName': source['inputName']}).scene_item_id
+                cl.send('GetSceneItemTransform', {'sceneName': sceneName, 'sceneItemId': scene_item_id})
+                self.assertTrue(cl.send('GetSceneItemEnabled', {'sceneName': sceneName, 'sceneItemId': scene_item_id}).scene_item_enabled)
+                self.assertFalse(cl.send('GetSceneItemLocked', {'sceneName': sceneName, 'sceneItemId': scene_item_id}).scene_item_locked)
+                cl.send('GetSceneItemBlendMode', {'sceneName': sceneName, 'sceneItemId': scene_item_id})
+                cl.send('GetSceneItemPrivateSettings', {'sceneName': sceneName, 'sceneItemId': scene_item_id})
                 cl.send('SetCurrentPreviewScene', {'sceneName': sceneName})
                 cl.send('SetCurrentProgramScene', {'sceneName': sceneName})
                 if 'sleep_after_creation' in source:

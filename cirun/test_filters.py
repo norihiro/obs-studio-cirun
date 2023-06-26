@@ -1,3 +1,4 @@
+import copy
 import os
 import random
 import sys
@@ -297,6 +298,8 @@ class OBSFilterTest(obstest.OBSTest):
                 if 'sleep_after_creation' in f:
                     sleep(f['sleep_after_creation'])
                 cl.send('GetSourceFilter', f)
+                cl.send('GetSourceFilterList', {'sourceName': source_name})
+                cl.send('GetSourceFilterDefaultSettings', f)
                 ff.append(f)
 
                 i = 1
@@ -310,6 +313,9 @@ class OBSFilterTest(obstest.OBSTest):
 
         with self.subTest(msg='open setting dialogs'):
             for f in ff:
+                f = copy.deepcopy(f)
+                f['filterEnabled'] = True
+                cl.send('SetSourceFilterEnabled', f)
                 cl.send('SetCurrentProgramScene', {'sceneName': 'Scene ' + f['sourceName']})
                 cl.send('OpenInputFiltersDialog', {'inputName': f['sourceName']})
                 util.take_screenshot()
@@ -321,6 +327,15 @@ class OBSFilterTest(obstest.OBSTest):
             self.assertFalse(obstest._is_obs_running())
             self.obs.run()
             self.assertTrue(obstest._is_obs_running())
+            cl = self.obs.get_obsws()
+            for f in ff:
+                f = copy.deepcopy(f)
+                f['filterIndex'] = 5
+                cl.send('SetSourceFilterIndex', f)
+                f['newFilterName'] = 'renamed name'
+                cl.send('SetSourceFilterName', f)
+                f['filterName'] = f['newFilterName']
+                cl.send('RemoveSourceFilter', f)
 
         self.obs.term()
         self.assertFalse(obstest._is_obs_running())
