@@ -36,6 +36,7 @@ class OBSStatsTest(obstest.OBSTest):
         util.take_screenshot()
 
         try:
+            cl.send('GetRecordStatus')
             cl.send('StopRecord')
         except:
             # The StartRecord failed on macOS. Just ignore the failure for now.

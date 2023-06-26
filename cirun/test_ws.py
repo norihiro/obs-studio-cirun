@@ -179,6 +179,12 @@ class OBSWSTest(obstest.OBSTest):
         cl.send('SetCurrentProfile', {'profileName': current_profile})
         cl.send('RemoveProfile', {'profileName': 'new profile'})
 
+        cl.send('SetVideoSettings', {'outputWidth': 640, 'outputHeight': 360});
+
+        cl.send('SetProfileParameter', {'parameterCategory': 'WS', 'parameterName': 'param', 'parameterValue': 'value'})
+        param = cl.send('GetProfileParameter', {'parameterCategory': 'WS', 'parameterName': 'param'})
+        self.assertTrue(param.parameter_value == 'value')
+
 
 if __name__ == '__main__':
     unittest.main()
