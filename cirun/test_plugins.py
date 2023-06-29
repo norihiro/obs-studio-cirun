@@ -1,6 +1,8 @@
+import os
 import sys
 from time import sleep
 import re
+import urllib.request
 import unittest
 import pyautogui
 import obstest
@@ -36,6 +38,21 @@ def _create_scene_with_media(cl, scene_name, source_name):
         },
     })
     return True
+
+
+def _download_url(url):
+    '''
+    Download from URL and save on the current directory.
+    File name will be taken from the base of the URL.
+    url - The URL to download.
+    return - Full path of the saved file.
+    '''
+    req = urllib.request.Request(url)
+    res = urllib.request.urlopen(req)
+    name = os.getcwd() + '/' + url.rsplit('/', 1)[-1]
+    with open(name, 'wb') as f:
+        f.write(res.read())
+    return name
 
 
 class OBSPluginTest(obstest.OBSTest):
@@ -143,6 +160,44 @@ class OBSPluginTest(obstest.OBSTest):
             log = self._get_loglines()
             self._assert_log(log, 'Number of memory leaks: 0$')
             self.assertFalse(obstest._is_obs_running())
+
+    def test_face_tracker(self):
+        obsplugin.download_install_plugin('norihiro/obs-face-tracker')
+
+        self.obs.run()
+        cl = self.obs.get_obsws()
+
+        # A face image to test obs-face-tracker.
+        image_url = 'http://spr.nagater.net/~obs-cirun/data/img-0063-crop.jpeg'
+        src_name = 'image'
+        cl.send('CreateInput', {
+            'inputName': src_name,
+            'sceneName': 'Scene',
+            'inputKind': 'image_source',
+            'inputSettings': {
+                'file': _download_url(image_url),
+            },
+        })
+
+        cl.send('CreateSourceFilter', {
+            'sourceName': src_name,
+            'filterName': 'face_tracker_filter',
+            'filterKind': 'face_tracker_filter',
+            'filterSettings': {
+                "debug_always_show": True,
+                "debug_faces": True,
+                "debug_notrack": True,
+            },
+        })
+
+        sleep(5)
+        util.take_screenshot()
+        sleep(5)
+        util.take_screenshot()
+        cl.send('OpenInputFiltersDialog', {'inputName': src_name})
+        sleep(1)
+        util.take_screenshot()
+        pyautogui.hotkey('esc')
 
 
 if __name__ == '__main__':
