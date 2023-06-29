@@ -14,12 +14,12 @@ runs:
   steps:
     - name: 'Restore obs-build-dependencies directory'
       id: obs-build-dependencies-cache
-      if: ${{ runner.os == 'Linux' && github.event_name != 'schedule'}}
+      if: ${{ runner.os == 'Linux' && (github.event_name != 'schedule' || inputs.use_cache == 'true') }}
       uses: actions/cache/restore@v3
       with:
         path: obs-build-dependencies
-        key: obs-build-dependencies-${{ inputs.obs_hash }}
-        restore-keys: obs-build-dependencies-
+        key: obs-build-dependencies-${{ runner.os }}-${{ inputs.obs_hash }}
+        restore-keys: obs-build-dependencies-${{ runner.os }}-
 
     - name: 'Configure and build obs-studio'
       if: ${{ runner.os == 'Linux' }}
@@ -70,5 +70,5 @@ runs:
       if: ${{ runner.os == 'Linux' && inputs.use_cache != 'true' }}
       with:
         path: obs-build-dependencies
-        key: obs-build-dependencies-${{ inputs.obs_hash }}
+        key: obs-build-dependencies-${{ runner.os }}-${{ inputs.obs_hash }}
 
