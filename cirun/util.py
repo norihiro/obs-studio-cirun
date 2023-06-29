@@ -74,6 +74,7 @@ def wait_text(text, confidence_threshold=0.9, sleep_each=1, timeout=None, ocrfun
             return tt[0]
         if timeout and time_passed >= timeout:
             s_bestmatch = f'current best match is "{tt[0].text}"' if len(tt) else 'no matching text'
+            take_screenshot(capture=False, draw_cb=draw_ocrdata)
             raise TimeoutError(f'Cannot find "{text}" {s_bestmatch}')
 
 
