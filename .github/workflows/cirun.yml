@@ -33,6 +33,7 @@ jobs:
     outputs:
       obs_hash: ${{ steps.setup.outputs.obs_hash }}
       patch_hash: ${{ steps.setup.outputs.patch_hash }}
+      plugin_hash: ${{ steps.setup.outputs.plugin_hash }}
 
     steps:
       - name: 'Checkout run-script'
@@ -50,8 +51,12 @@ jobs:
             q="${q}&sha=$obs_commit"
           fi
           obs_hash="$(gh api "/repos/obsproject/obs-studio/commits?$q" | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
+          cat cirun/obsplugin.py > plugin-list.txt
+          grep download_install_plugin cirun/*.py | tr -d ' ' | env LC_ALL=C sort -u >> plugin-list.txt
+          plugin_hash="$(sha1sum < plugin-list.txt | head -c 9)"
           echo "obs_hash=$obs_hash" >> $GITHUB_OUTPUT
           echo "patch_hash=$patch_hash" >> $GITHUB_OUTPUT
+          echo "plugin_hash=$plugin_hash" >> $GITHUB_OUTPUT
 
   cirun:
     strategy:
@@ -66,6 +71,7 @@ jobs:
     env:
       obs_hash: ${{needs.setup_job.outputs.obs_hash}}
       patch_hash: ${{needs.setup_job.outputs.patch_hash}}
+      plugin_hash: ${{needs.setup_job.outputs.plugin_hash}}
       BLOCKED_FORMULAS: 'speexdsp curl php composer'
 
     steps:
@@ -164,7 +170,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: plugin-cache
-          key: plugin-${{ runner.os }}-${{ hashFiles('cirun/*plugin*') }}
+          key: plugin-${{ runner.os }}-${{ env.plugin_hash }}
           restore-keys: plugin-${{ runner.os }}-
 
       - name: 'Cache test source files (OS independent)'
