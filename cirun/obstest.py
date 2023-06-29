@@ -35,7 +35,7 @@ class OBSTest(unittest.TestCase):
                 util.wait_text('File Edit View Dock Profile Scene Collection Tools Help', timeout=10,
                                ocrfunc=lambda u: util.ocr_topwindow(mode='top', length=200))
             elif sys.platform == 'darwin':
-                util.wait_text('OBS Studio File Edit View Dock Profile Scene Collection Tools Help', timeout=10,
+                util.wait_text('OBS File Edit View Dock Profile Scene Collection Tools Help', timeout=10,
                                ocrfunc=lambda u: u.ocr(crop=(0, 0, u.screenshot.width, 40)) )
 
     def tearDown(self):
