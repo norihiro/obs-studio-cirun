@@ -89,7 +89,7 @@ class OBSProjectorTest(obstest.OBSTest):
 
     def _click_random(self, method):
         cx = int(random.uniform(4, util.u.screenshot.width - 4))
-        cy = int(random.uniform(util.u.screenshot.height / 2, util.u.screenshot.height - 4))
+        cy = int(random.uniform(4, util.u.screenshot.height - 4))
         method((cx, cy))
 
     def test_all_multiview_layouts(self):
@@ -101,7 +101,7 @@ class OBSProjectorTest(obstest.OBSTest):
             for i in range(0, 25):
                 _create_scene_with_color(cl, f'Scene {i}', None, int(random.uniform(0xFF000000, 0xFFFFFFFF)))
             cl.send('SetStudioModeEnabled', {'studioModeEnabled': True})
-            cl.send('RemoveScene', {'sceneName': 'Scene'})
+            cl.send('SetSourcePrivateSettings', {'sourceName': 'Scene', 'sourceSettings': {'show_in_multiview': False}})
             util.take_screenshot()
             self.obs.term()
             self.assertFalse(obstest._is_obs_running())
@@ -109,12 +109,15 @@ class OBSProjectorTest(obstest.OBSTest):
         def _cases():
             for portrait in (False, True):
                 for multiview_layout in range(0, 10):
-                    yield (portrait, multiview_layout)
+                    yield (portrait, multiview_layout, True, True)
+            yield (False, 0, False, False)
 
-        for portrait, multiview_layout in _cases():
+        for portrait, multiview_layout, draw_label, safe_areas in _cases():
             with self.subTest(msg=f'multiview-{multiview_layout}'):
                 obstest.ensure_not_running()
                 self.obs.config.get_global()['BasicWindow']['MultiviewLayout'] = f'{multiview_layout}'
+                self.obs.config.get_global()['BasicWindow']['MultiviewDrawNames'] = f'{draw_label}'
+                self.obs.config.get_global()['BasicWindow']['MultiviewDrawAreas'] = f'{safe_areas}'
                 self.obs.config.save_global()
                 profile = self.obs.config.get_profile()
                 profile['Video']['BaseCX'] = '480' if portrait else '1280'
