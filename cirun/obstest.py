@@ -45,11 +45,11 @@ class OBSTest(unittest.TestCase):
             elif sys.platform == 'darwin':
                 util.wait_text('OBS File Edit View Dock Profile Scene Collection Tools Help', timeout=10,
                                ocrfunc=lambda u: u.ocr(crop=(0, 0, u.screenshot.width, 40)) )
+        print(f'::group::{name}')
 
     def tearDown(self):
-        self.obs.term()
-
         try:
+            self.obs.term()
             wait_memleak_sec = 30
             while not self._log_has_memleak_count():
                 print(f'Warning: Cannot find "Number of memory leaks" in the log "{self.obs.get_logfile()}". Waiting...', flush=True)
@@ -60,6 +60,8 @@ class OBSTest(unittest.TestCase):
                     break
         except TypeError:
             pass
+        finally:
+            print('::endgroup::')
 
         self.obs.config.move_logs()
         if _is_obs_running():
