@@ -74,9 +74,19 @@ class OBSPluginTest(obstest.OBSTest):
         obsplugin.download_install_plugin('norihiro/obs-asynchronous-audio-source')
         obsplugin.download_install_plugin('norihiro/obs-async-audio-filter')
         obsplugin.download_install_plugin('norihiro/obs-mute-filter')
+        obsplugin.download_install_plugin('norihiro/obs-loudness-dock')
 
         self.obs.run()
         cl = self.obs.get_obsws()
+
+        with self.subTest(msg='open-loudness-dock'):
+            u = util.u
+            util.ocr_mainmenu()
+            t = util.click_verbose(u.find_text('Docks'))
+            util.take_screenshot()
+            util.ocr_verbose(crop=util.expand_locator(t, (120, 0, 120, 380)))
+            util.click_verbose(u.find_text('Loudness'))
+            util.take_screenshot()
 
         name = 'async-audio'
         cl.send('CreateInput', {
@@ -94,6 +104,7 @@ class OBSPluginTest(obstest.OBSTest):
             'filterKind': 'net.nagater.obs.' + 'asynchronous-audio-filter'
         })
         sleep(15)
+        util.take_screenshot()
 
         cl.send('CreateSourceFilter', {
             'sourceName': name,
@@ -101,6 +112,7 @@ class OBSPluginTest(obstest.OBSTest):
             'filterKind': 'net.nagater.obs-mute-filter.' + 'mute-filter'
         })
         sleep(1)
+        util.take_screenshot()
 
         self.obs.term()
         log = self._get_loglines()
