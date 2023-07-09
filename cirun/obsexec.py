@@ -248,10 +248,11 @@ class OBSExec:
                 err = e
                 if self.proc_obs and self.proc_obs.poll() == None:
                     sleep(3)
-                    print(f'Info: Failed to connect to obs-websocket {e=}. {n_retry} more attempt(s).')
-                    sys.stdout.flush()
-                    if sys.platform == 'linux':
-                        os.system('ss -tnlp || sudo apt install -y iproute2 && ss -tnlp')
+                    if n_retry < 7:
+                        print(f'Info: Failed to connect to obs-websocket {e=}. {n_retry} more attempt(s).')
+                        sys.stdout.flush()
+                        if sys.platform == 'linux':
+                            os.system('ss -tnlp || sudo apt install -y iproute2 && ss -tnlp')
         raise err
 
     def get_logfile(self):
