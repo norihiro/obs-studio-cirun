@@ -1,15 +1,15 @@
-diff --git a/CI/linux/02_build_obs.sh b/CI/linux/02_build_obs.sh
-index 9f81a651c..6b4552379 100755
---- a/CI/linux/02_build_obs.sh
-+++ b/CI/linux/02_build_obs.sh
-@@ -56,6 +56,10 @@ _configure_obs() {
-     cmake -S . -B ${BUILD_DIR} -G Ninja \
-         -DCEF_ROOT_DIR="${DEPS_BUILD_DIR}/cef_binary_${LINUX_CEF_BUILD_VERSION:-${CI_LINUX_CEF_VERSION}}_linux64" \
-         -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} \
-+        -DCMAKE_INSTALL_PREFIX=/usr \
-+        -DCMAKE_INSTALL_SYSCONFDIR=/etc \
-+        -DCMAKE_INSTALL_LOCALSTATEDIR=/var \
-+        -DCMAKE_INSTALL_LIBDIR=lib/x86_64-linux-gnu \
-         -DLINUX_PORTABLE=${PORTABLE_BUILD:-OFF} \
-         -DENABLE_AJA=OFF \
-         -DENABLE_NEW_MPEGTS_OUTPUT=OFF \
+diff --git a/.github/scripts/.build.zsh b/.github/scripts/.build.zsh
+index 7670c880f..c6840e18a 100755
+--- a/.github/scripts/.build.zsh
++++ b/.github/scripts/.build.zsh
+@@ -237,6 +237,10 @@ ${_usage_host:-}"
+           -G "${generator}"
+           -DCMAKE_BUILD_TYPE:STRING=${config}
+           -DCEF_ROOT_DIR:PATH="${project_root}/.deps/cef_binary_${CEF_VERSION}_${target//-/_}"
++          -DCMAKE_INSTALL_PREFIX=/usr
++          -DCMAKE_INSTALL_SYSCONFDIR=/etc
++          -DCMAKE_INSTALL_LOCALSTATEDIR=/var
++          -DCMAKE_INSTALL_LIBDIR=lib/x86_64-linux-gnu
+         )
+ 
+         local cmake_version

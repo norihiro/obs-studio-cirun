@@ -26,17 +26,17 @@ runs:
       shell: bash
       run: |
         set -ex
-        script/workflow2env.py -w obs-studio/.github/workflows/main.yml -j linux_build -e CEF_BUILD_VERSION_LINUX > build.env
-        . build.env
+        sudo apt update
+        sudo apt install -y zsh
         cd obs-studio
         if test "${{ inputs.use_cache }}" != 'true'; then
           for p in ../patch/*.patch; do
             patch -p1 < $p
           done
           export RESTORED_CEF=''
-          bash -x CI/build-linux.sh
+          .github/scripts/build-linux
         else
-          bash -x CI/linux/01_install_dependencies.sh
+          .github/scripts/build-linux --skip-build
         fi
 
     - name: 'Build obs-studio'
@@ -60,10 +60,7 @@ runs:
         rm -rf build_macos/OBS.app
         export -n SEEKING_TESTERS
         export TERM=''
-        export -n CI
-        export -n GITHUB_RUN_ID
-        CI/macos/01_install_dependencies.sh --architecture x86_64
-        CI/macos/02_build_obs.sh --architecture x86_64
+        .github/scripts/build-macos --target macos-x86_64
 
     - name: 'Save obs-build-dependencies directory'
       uses: actions/cache/save@v3

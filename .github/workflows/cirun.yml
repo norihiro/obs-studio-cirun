@@ -142,9 +142,10 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: |
           cd obs-studio
-          cmake -DENABLE_UNIT_TESTS=ON build/
-          cmake --build build
-          cmake --build build -t test
+          build=$(ls -td build*/  | head -n1)
+          cmake -DENABLE_UNIT_TESTS=ON $build
+          cmake --build $build
+          cmake --build $build -t test
 
       - name: 'Prepare tools'
         uses: ./.github/actions/setup-tool

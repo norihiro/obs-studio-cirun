@@ -10,8 +10,8 @@ runs:
       run: |
         set -e
 
-        (cd obs-studio && CI/linux/03_package_obs.sh)
-        sudo apt install -y ./obs-studio/build/*.deb
+        (cd obs-studio && .github/scripts/package-linux --package)
+        sudo apt install -y ./obs-studio/build*/*.deb
 
         apt_packages=(
           apt-transport-https gnupg
