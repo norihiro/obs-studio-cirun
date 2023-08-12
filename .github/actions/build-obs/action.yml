@@ -21,6 +21,27 @@ runs:
         key: obs-build-dependencies-${{ runner.os }}-${{ inputs.obs_hash }}
         restore-keys: obs-build-dependencies-${{ runner.os }}-
 
+    - name: 'Apply patches'
+      shell: bash
+      run: |
+        set -ex
+        cd obs-studio
+        if test "${{ inputs.use_cache }}" != 'true'; then
+          for p in ../patch/*.patch; do
+            conflict=$(awk '/^Conflict:/{print $2}' $p)
+            requires=$(awk '/^Requires:/{print $2}' $p)
+            if test -n "$conflict" && git merge-base --is-ancestor "$conflict" HEAD; then
+              echo "Info: Skipping $p because of conflicting $conflict"
+              continue
+            fi
+            if test -n "$requires" && ! git merge-base --is-ancestor "$requires" HEAD; then
+              echo "Info: Skipping $p because of missing requirement $requires"
+              continue
+            fi
+            patch -p1 < $p
+          done
+        fi
+
     - name: 'Configure and build obs-studio'
       if: ${{ runner.os == 'Linux' }}
       shell: bash
@@ -30,9 +51,6 @@ runs:
         sudo apt install -y zsh
         cd obs-studio
         if test "${{ inputs.use_cache }}" != 'true'; then
-          for p in ../patch/*.patch; do
-            patch -p1 < $p
-          done
           export RESTORED_CEF=''
           .github/scripts/build-linux
         else
@@ -54,9 +72,6 @@ runs:
         fi
 
         cd obs-studio
-        for p in ../patch/*.patch; do
-          patch -p1 < $p
-        done
         rm -rf build_macos/OBS.app
         export -n SEEKING_TESTERS
         export TERM=''

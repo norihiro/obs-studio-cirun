@@ -1,0 +1,16 @@
+Requires: cf8a8cce7227bedf074cd9a8276d82ed33e4ba44
+diff --git a/.github/scripts/.build.zsh b/.github/scripts/.build.zsh
+index 7410be322..4189f255d 100755
+--- a/.github/scripts/.build.zsh
++++ b/.github/scripts/.build.zsh
+@@ -190,6 +190,10 @@ build() {
+         -G Ninja
+         -DCMAKE_BUILD_TYPE:STRING=${config}
+         -DCEF_ROOT_DIR:PATH="${project_root}/.deps/cef_binary_${CEF_VERSION}_${target//-/_}"
++        -DCMAKE_INSTALL_PREFIX=/usr
++        -DCMAKE_INSTALL_SYSCONFDIR=/etc
++        -DCMAKE_INSTALL_LOCALSTATEDIR=/var
++        -DCMAKE_INSTALL_LIBDIR=lib/x86_64-linux-gnu
+         -DENABLE_AJA:BOOL=OFF
+         -DENABLE_WEBRTC:BOOL=OFF
+       )
