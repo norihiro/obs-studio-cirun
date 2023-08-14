@@ -1,0 +1,21 @@
+diff --git a/UI/qt-display.hpp b/UI/qt-display.hpp
+index 10fe735ed..374d9a51f 100644
+--- a/UI/qt-display.hpp
++++ b/UI/qt-display.hpp
+@@ -2,6 +2,7 @@
+ 
+ #include <QWidget>
+ #include <obs.hpp>
++#include <util/platform.h>
+ 
+ #define GREY_COLOR_BACKGROUND 0xFF4C4C4C
+ 
+@@ -26,7 +27,7 @@ signals:
+ public:
+ 	OBSQTDisplay(QWidget *parent = nullptr,
+ 		     Qt::WindowFlags flags = Qt::WindowFlags());
+-	~OBSQTDisplay() { display = nullptr; }
++	~OBSQTDisplay() { os_sleep_ms(100); display = nullptr; }
+ 
+ 	virtual QPaintEngine *paintEngine() const override;
+ 
