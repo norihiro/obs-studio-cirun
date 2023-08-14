@@ -18,6 +18,14 @@ def _is_obs_running():
     return False
 
 
+def ensure_not_running():
+    if _is_obs_running():
+        print('OBS has already been running. Killing it...')
+        OBSExec.killall_obs()
+    if _is_obs_running():
+        raise Exception('OBS is still running though attempted to terminate.')
+
+
 class OBSTest(unittest.TestCase):
     def setUp(self, config_name='obs-config-default', run=True):
         if _is_obs_running():
