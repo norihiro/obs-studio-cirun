@@ -21,6 +21,22 @@ def _find_line_re(lines, cond):
     return False
 
 
+def _create_scene_with_color(cl, scene_name, source_name, color):
+    if not source_name:
+        source_name = 'color-' + scene_name
+    cl.send('CreateScene', {'sceneName': scene_name})
+    cl.send('CreateInput', {
+        'inputName': source_name,
+        'sceneName': scene_name,
+        'inputKind': 'color_source_v3',
+        'inputSettings': {
+            'color': color,
+            'width': 640,
+            'height': 360,
+        },
+    })
+
+
 def _create_scene_with_media(cl, scene_name, source_name):
     fname = ffmpeg_gen.lavfi_testsrc2()
     if not fname:
@@ -151,7 +167,8 @@ class OBSPluginTest(obstest.OBSTest):
         else:
             util.click_verbose(u.find_text('OK Cancel'), location_ratio=(0.0, 0.5))
 
-        _create_scene_with_media(cl, 'Scene 1', 'media-source')
+        if not _create_scene_with_media(cl, 'Scene 1', 'media-source'):
+            _create_scene_with_color(cl, 'Scene 1', 'color source', int(random.uniform(0xFF000000, 0xFFFFFFFF)))
         cl.send('SetCurrentProgramScene', {'sceneName': 'Scene 1'})
 
         sleep(5)
