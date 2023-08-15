@@ -90,7 +90,7 @@ jobs:
 
       - name: 'Restore obs-studio directory'
         id: obs-studio-cache
-        if: github.event_name != 'schedule'
+        if: runner.os != 'Linux' && github.event_name != 'schedule'
         uses: actions/cache/restore@v3
         with:
           path: obs-studio
@@ -147,7 +147,7 @@ jobs:
 
       - name: 'Save obs-studio directory'
         uses: actions/cache/save@v3
-        if: ${{ steps.obs-studio-cache.outputs.cache-hit != 'true' }}
+        if: ${{ runner.os != 'Linux' && steps.obs-studio-cache.outputs.cache-hit != 'true' }}
         with:
           path: obs-studio
           key: obs-studio-${{ runner.os }}-${{ env.obs_hash }}-${{ env.patch_hash }}
