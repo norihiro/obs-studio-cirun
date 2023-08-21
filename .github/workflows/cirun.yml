@@ -157,8 +157,6 @@ jobs:
         run: |
           cd obs-studio
           build=$(ls -td build*/  | head -n1)
-          cmake -DENABLE_UNIT_TESTS=ON $build
-          cmake --build $build
           cmake --build $build -t test
 
       - name: 'Prepare tools'

@@ -1,0 +1,13 @@
+Requires: cf8a8cce7227bedf074cd9a8276d82ed33e4ba44
+diff --git a/.github/scripts/.build.zsh b/.github/scripts/.build.zsh
+index 4189f255d..3d10ff46f 100755
+--- a/.github/scripts/.build.zsh
++++ b/.github/scripts/.build.zsh
+@@ -194,6 +194,7 @@ build() {
+         -DCMAKE_INSTALL_SYSCONFDIR=/etc
+         -DCMAKE_INSTALL_LOCALSTATEDIR=/var
+         -DCMAKE_INSTALL_LIBDIR=lib/x86_64-linux-gnu
++        -DENABLE_UNIT_TESTS=ON
+         -DENABLE_AJA:BOOL=OFF
+         -DENABLE_WEBRTC:BOOL=OFF
+       )
