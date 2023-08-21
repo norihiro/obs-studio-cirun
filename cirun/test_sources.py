@@ -299,6 +299,11 @@ class OBSSourceTest(obstest.OBSTest):
             cl.send('OpenInputInteractDialog', {'inputName': 'browser'})
             util.take_screenshot() # TODO: Input some interactions
 
+        with self.subTest(msg='browser-refresh'):
+            cl = self.obs.get_obsws()
+            cl.send('PressInputPropertiesButton', {'inputName': 'browser', 'propertyName': 'refreshnocache'})
+            util.take_screenshot() # TODO: Input some interactions
+
         self.obs.term()
         self.assertFalse(obstest._is_obs_running())
 
