@@ -50,13 +50,21 @@ jobs:
           if test -n "$obs_commit"; then
             q="${q}&sha=$obs_commit"
           fi
-          obs_hash="$(gh api "/repos/obsproject/obs-studio/commits?$q" | jq '.[0]["sha"]' | tr -d '"' | head -c 9)"
+          gh api "/repos/obsproject/obs-studio/commits?$q" > commit.json
+          obs_hash="$(jq -r '.[0]["sha"]' < commit.json | head -c 9)"
+          commit_html_url="$(jq -r '.[0]["html_url"]' < commit.json)"
           cat cirun/obsplugin.py > plugin-list.txt
           grep download_install_plugin cirun/*.py | tr -d ' ' | env LC_ALL=C sort -u >> plugin-list.txt
           plugin_hash="$(sha1sum < plugin-list.txt | head -c 9)"
           echo "obs_hash=$obs_hash" >> $GITHUB_OUTPUT
           echo "patch_hash=$patch_hash" >> $GITHUB_OUTPUT
           echo "plugin_hash=$plugin_hash" >> $GITHUB_OUTPUT
+          echo "- obs-studio [${obs_hash}](${commit_html_url})" >> $GITHUB_STEP_SUMMARY
+          if test -n "$obs_commit"; then
+            echo "  - set from the input $obs_commit" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "  - the latest commit" >> $GITHUB_STEP_SUMMARY
+          fi
 
   cirun:
     strategy:
