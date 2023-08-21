@@ -48,11 +48,13 @@ runs:
       run: |
         set -ex
         sudo apt update
-        sudo apt install -y zsh
+        sudo apt install -y zsh ccache
         cd obs-studio
         if test "${{ inputs.use_cache }}" != 'true'; then
           export RESTORED_CEF=''
+          ccache -z
           .github/scripts/build-linux
+          ccache -s
         else
           sudo apt update
           sudo apt install -y cmake ninja-build pkg-config clang clang-format build-essential curl ccache git zsh jq \
