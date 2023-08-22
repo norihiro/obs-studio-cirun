@@ -23,6 +23,7 @@ class OBSExec:
 
     def run(self):
         self._obsws = None
+        self.config.move_logs()
         if sys.platform == 'linux':
             self.proc_obs = subprocess.Popen(['obs'])
         elif sys.platform == 'darwin':
