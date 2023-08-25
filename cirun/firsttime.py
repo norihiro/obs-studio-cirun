@@ -89,11 +89,16 @@ def _new_update_available():
             if len(tt_update) > 0 and tt_update[0].confidence > 0.8:
                 util.click_verbose(tt_update[0])
             tt_firsttime = u.find_texts('Specify what you want to use the program for')
-            if len(tt_update) > 0 and tt_update[0].confidence > 0.8:
+            if len(tt_firsttime) > 0 and tt_firsttime[0].confidence > 0.8:
                 return
             if time_passed >= timeout:
-                s_bestmatch = f'current best match is "{tt[0].text}"' if len(tt) else 'no matching text'
-                raise TimeoutError(f'Cannot find "{text}" {s_bestmatch}')
+                print(f'_new_update_available: tt_update.size={len(tt_update)}')
+                for t in tt_update:
+                    print(f'_new_update_available:   text="{t.text}" confidence={t.confidence}')
+                print(f'_new_update_available: tt_firsttime.size={len(tt_firsttime)}')
+                for t in tt_firsttime:
+                    print(f'_new_update_available:   text="{t.text}" confidence={t.confidence}')
+                return
     except:
         return
 
