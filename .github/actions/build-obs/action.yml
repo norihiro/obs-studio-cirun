@@ -64,23 +64,12 @@ runs:
 
     - name: 'Build obs-studio'
       if: ${{ runner.os == 'macOS' && inputs.use_cache != 'true' }}
-      shell: bash
-      run: |
-        REMOVE_FORMULAS=""
-        for FORMULA in ${{ env.BLOCKED_FORMULAS }}; do
-          if [ -d "/usr/local/opt/${FORMULA}" ]; then
-            REMOVE_FORMULAS="${REMOVE_FORMULAS} ${FORMULA}"
-          fi
-        done
-        if [ -n "${REMOVE_FORMULAS}" ]; then
-          brew uninstall ${REMOVE_FORMULAS}
-        fi
-
-        cd obs-studio
-        rm -rf build_macos/OBS.app
-        export -n SEEKING_TESTERS
-        export TERM=''
-        .github/scripts/build-macos --target macos-x86_64
+      uses: ./obs-studio/.github/actions/build-obs
+      with:
+        workingDirectory: ${{ github.workspace }}/obs-studio/
+        target: x86_64
+        config: RelWithDebInfo
+        codesign: false
 
     - name: 'Save obs-build-dependencies directory'
       uses: actions/cache/save@v3
