@@ -88,6 +88,23 @@ int main(int argc, char **argv)
 {
 	obs_startup("C", NULL, NULL);
 
+	struct obs_video_info ovi = {
+		.graphics_module = "libobs-opengl",
+		.fps_num = 10,
+		.fps_den = 1,
+		.base_width = 720,
+		.base_height = 360,
+		.output_width = 720,
+		.output_height = 360,
+		.output_format = VIDEO_FORMAT_NV12,
+		.adapter = 0,
+		.gpu_conversion = false,
+		.colorspace = VIDEO_CS_DEFAULT,
+		.range = VIDEO_RANGE_PARTIAL,
+		.scale_type = OBS_SCALE_DISABLE,
+	};
+	obs_reset_video(&ovi);
+
 	load_modules();
 
 	obs_shutdown();
