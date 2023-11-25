@@ -60,3 +60,8 @@ add_executable(test_graphics test_graphics.c)
 target_include_directories(test_graphics PRIVATE ${CMOCKA_INCLUDE_DIR})
 target_link_libraries(test_graphics PRIVATE OBS::libobs ${CMOCKA_LIBRARIES})
 add_test(test_graphics ${CMAKE_CURRENT_BINARY_DIR}/test_graphics)
+
+add_executable(test_obshpp test_obshpp.cpp)
+target_include_directories(test_obshpp PRIVATE ${CMOCKA_INCLUDE_DIR})
+target_link_libraries(test_obshpp PRIVATE OBS::libobs ${CMOCKA_LIBRARIES})
+add_test(test_obshpp ${CMAKE_CURRENT_BINARY_DIR}/test_obshpp)

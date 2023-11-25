@@ -14,6 +14,7 @@ static void data_basic_test(void **state)
 	obs_data_t *data = obs_data_create();
 	obs_data_t *data1;
 	obs_data_array_t *array;
+	obs_data_array_t *array1;
 
 	array = obs_data_array_create();
 	data1 = obs_data_create();
@@ -45,7 +46,6 @@ static void data_basic_test(void **state)
 	obs_data_set_obj(data, "data", data1);
 	obs_data_release(data1);
 	obs_data_set_array(data, "array", array);
-	obs_data_array_release(array);
 
 	obs_data_set_default_string(data, "string", "default");
 	obs_data_set_default_int(data, "int", 12);
@@ -66,7 +66,10 @@ static void data_basic_test(void **state)
 	data1 = obs_data_create();
 	obs_data_set_int(data1, "key3", 3);
 	obs_data_set_autoselect_obj(data, "data", data1);
+	obs_data_set_autoselect_array(data, "array_as", array);
 	obs_data_release(data1);
+
+	obs_data_array_release(array);
 
 	assert_string_equal(obs_data_get_string(data, "string"), "val");
 	assert_int_equal(obs_data_get_int(data, "int"), 1234);
@@ -86,10 +89,17 @@ static void data_basic_test(void **state)
 	assert_int_equal(obs_data_get_autoselect_bool(data, "bool1"), false);
 	assert_int_equal(obs_data_get_autoselect_bool(data, "bool0"), false);
 
+	assert_int_equal(obs_data_has_default_value(data, "bool1"), true);
+	assert_int_equal(obs_data_has_default_value(data, "bool2"), false);
+
 	obs_data_set_autoselect_string(data, "move", "autoselect");
 	obs_data_set_default_string(data, "move", "default");
 	assert_string_equal(obs_data_get_string(data, "move"), "default");
 	assert_string_equal(obs_data_get_autoselect_string(data, "move"), "autoselect");
+
+	array1 = obs_data_get_autoselect_array(data, "array_as");
+	assert_ptr_not_equal(array1, NULL);
+	obs_data_array_release(array1);
 
 	data1 = obs_data_get_defaults(data);
 	assert_string_equal(obs_data_get_string(data1, "string"), "default");
@@ -98,6 +108,21 @@ static void data_basic_test(void **state)
 	assert_int_equal(obs_data_get_bool(data1, "bool1"), false);
 	assert_int_equal(obs_data_get_bool(data1, "bool0"), true);
 	obs_data_release(data1);
+
+	data1 = obs_data_get_autoselect_obj(data, "data");
+	assert_ptr_not_equal(data1, NULL);
+	obs_data_release(data1);
+
+	// remove values and check it
+	assert_int_equal(obs_data_get_bool(data, "bool0"), false);
+	obs_data_unset_user_value(data, "bool0");
+	assert_int_equal(obs_data_get_bool(data, "bool0"), true);
+	obs_data_unset_default_value(data, "bool0");
+	assert_int_equal(obs_data_get_bool(data, "bool0"), false);
+
+	assert_int_equal(obs_data_has_autoselect_value(data, "bool0"), true);
+	obs_data_unset_autoselect_value(data, "bool0");
+	assert_int_equal(obs_data_has_autoselect_value(data, "bool0"), false);
 
 	obs_data_release(data);
 
@@ -120,6 +145,20 @@ static void json_errors(void **state)
 
 	obs_data_t *data = obs_data_create_from_json_file_safe("json_errors.json", ".bak");
 	assert_ptr_not_equal(data, NULL);
+
+	assert_int_equal(obs_data_save_json_pretty_safe(data, "json_saved.json", ".tmp", ".bak"), true);
+	char line[64];
+	fp = fopen("json_saved.json", "r");
+	assert_string_equal(fgets(line, sizeof(line), fp), "{\n");
+	assert_string_equal(fgets(line, sizeof(line), fp), "    \"ok\": true\n");
+	assert_string_equal(fgets(line, sizeof(line), fp), "}");
+	fclose(fp);
+
+	assert_int_equal(obs_data_save_json(data, "json_saved.json"), true);
+	fp = fopen("json_saved.json", "r");
+	assert_string_equal(fgets(line, sizeof(line), fp), "{\"ok\":true}");
+	fclose(fp);
+
 	obs_data_release(data);
 
 	assert_int_equal(bnum_allocs(), 0);
