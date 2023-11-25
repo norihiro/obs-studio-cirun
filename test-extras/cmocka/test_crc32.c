@@ -19,6 +19,10 @@ static void crc32_test(void **state)
 	crc2 = calc_crc32(crc2, buf, 14);
 
 	assert_int_equal(crc1, crc2);
+
+	assert_int_equal(~calc_crc32(~0, "\x80", 1), 0xEDB88320);
+	assert_int_equal(~calc_crc32(~0, "\x00", 1), 0);
+	assert_int_equal(calc_crc32(~0, "\x01", 1) ^ calc_crc32(~0, "\x02", 1), ~calc_crc32(~0, "\x03", 1));
 }
 
 int main()
