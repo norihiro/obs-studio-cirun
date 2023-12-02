@@ -1,0 +1,27 @@
+Requires: cf8a8cce72
+diff --git a/.github/scripts/.Brewfile b/.github/scripts/.Brewfile
+index cdc51f13e..ac7763285 100644
+--- a/.github/scripts/.Brewfile
++++ b/.github/scripts/.Brewfile
+@@ -2,4 +2,3 @@ brew "ccache"
+ brew "cmake"
+ brew "git"
+ brew "jq"
+-brew "xcbeautify"
+diff --git a/.github/scripts/.build.zsh b/.github/scripts/.build.zsh
+index 8efd1f5ef..554f8fcb4 100755
+--- a/.github/scripts/.build.zsh
++++ b/.github/scripts/.build.zsh
+@@ -135,11 +135,7 @@ build() {
+ 
+       log_group "Building ${product_name}..."
+       run_xcodebuild() {
+-        if (( debug )) {
+-          xcodebuild ${@}
+-        } else {
+-          xcodebuild ${@} 2>&1 | xcbeautify
+-        }
++        xcodebuild ${@}
+       }
+ 
+       local -a build_args=(
