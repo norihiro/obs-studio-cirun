@@ -12,10 +12,19 @@ on:
         description: 'Step to call tmate'
         options:
           - none
+          - before-build
           - before-first
           - before-unittest
           - before-upload
         required: false
+      tmate-os:
+        type: choice
+        description: 'OS to call tmate'
+        options:
+          - macOS
+          - Linux
+          - Windows
+        required: true
       obs-commit:
         description: 'Build obs-studio using this commit instead of master.'
         type: string
@@ -121,6 +130,10 @@ jobs:
           key: ccache-${{ runner.os }}-${{ env.obs_hash }}
           restore-keys: ccache-${{ runner.os }}-
 
+      - name: 'tmate (optional)'
+        if: ${{ always() && github.event.inputs.tmate-at == 'before-build' && github.event.inputs.tmate-os == runner.os }}
+        uses: mxschmitt/action-tmate@v3
+
       - name: 'Configure and build obs-studio'
         if: ${{ runner.os != 'Windows' }}
         uses: ./.github/actions/build-obs
@@ -205,7 +218,7 @@ jobs:
           lcov --exclude '*/obs-studio-cirun/test-extras/*' -c -d . -o $artifact/lcov.info
 
       - name: 'tmate (optional)'
-        if: ${{ always() && github.event.inputs.tmate-at == 'before-first' }}
+        if: ${{ always() && github.event.inputs.tmate-at == 'before-first' && github.event.inputs.tmate-os == runner.os }}
         uses: mxschmitt/action-tmate@v3
 
       - name: 'Run first time'
@@ -220,7 +233,7 @@ jobs:
           ./wrapper.sh python3 cirun/obs-secondtime.py
 
       - name: 'tmate (optional)'
-        if: ${{ always() && github.event.inputs.tmate-at == 'before-unittest' }}
+        if: ${{ always() && github.event.inputs.tmate-at == 'before-unittest' && github.event.inputs.tmate-os == runner.os }}
         uses: mxschmitt/action-tmate@v3
 
       - name: 'Run unit tests'
@@ -278,7 +291,7 @@ jobs:
           esac
 
       - name: 'tmate (optional)'
-        if: ${{ always() && github.event.inputs.tmate-at == 'before-upload' }}
+        if: ${{ always() && github.event.inputs.tmate-at == 'before-upload' && github.event.inputs.tmate-os == runner.os }}
         uses: mxschmitt/action-tmate@v3
 
       - name: 'Upload log files'
