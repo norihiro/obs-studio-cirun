@@ -1,0 +1,91 @@
+Requires: 8dd20dfd33
+diff --git a/cmake/macos/compilerconfig.cmake b/cmake/macos/compilerconfig.cmake
+index 4cca6bfe4..48a1e14b3 100644
+--- a/cmake/macos/compilerconfig.cmake
++++ b/cmake/macos/compilerconfig.cmake
+@@ -16,8 +16,8 @@ endif()
+ set_property(CACHE CMAKE_OSX_ARCHITECTURES PROPERTY STRINGS arm64 x86_64)
+ 
+ # Make sure the macOS SDK is recent enough for OBS
+-set(OBS_MACOS_MINIMUM_SDK "13.1") # Keep in sync with Xcode
+-set(OBS_MACOS_MINIMUM_XCODE "14.2") # Keep in sync with SDK
++set(OBS_MACOS_MINIMUM_SDK "12.1") # Keep in sync with Xcode
++set(OBS_MACOS_MINIMUM_XCODE "13.2") # Keep in sync with SDK
+ message(DEBUG "macOS SDK Path: ${CMAKE_OSX_SYSROOT}")
+ string(REGEX MATCH ".+/MacOSX.platform/Developer/SDKs/MacOSX([0-9]+\.[0-9])+\.sdk$" _ ${CMAKE_OSX_SYSROOT})
+ set(OBS_MACOS_CURRENT_SDK ${CMAKE_MATCH_1})
+diff --git a/plugins/mac-virtualcam/src/camera-extension/CMakeLists.txt b/plugins/mac-virtualcam/src/camera-extension/CMakeLists.txt
+index 4ff8f6a4a..ceb5278cc 100644
+--- a/plugins/mac-virtualcam/src/camera-extension/CMakeLists.txt
++++ b/plugins/mac-virtualcam/src/camera-extension/CMakeLists.txt
+@@ -43,7 +43,6 @@ string(TIMESTAMP CURRENT_YEAR "%Y")
+ set_target_xcode_properties(
+   mac-camera-extension
+   PROPERTIES SWIFT_VERSION 5.0
+-             MACOSX_DEPLOYMENT_TARGET 13.0
+              CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/macos/entitlements.plist"
+              PRODUCT_NAME com.obsproject.obs-studio.mac-camera-extension
+              PRODUCT_BUNDLE_IDENTIFIER com.obsproject.obs-studio.mac-camera-extension
+diff --git a/deps/libcaption/CMakeLists.txt b/deps/libcaption/CMakeLists.txt
+index 53cd79196..6b669043f 100644
+--- a/deps/libcaption/CMakeLists.txt
++++ b/deps/libcaption/CMakeLists.txt
+@@ -27,7 +27,7 @@ target_compile_definitions(caption PRIVATE __STDC_CONSTANT_MACROS $<$<CXX_COMPIL
+ 
+ target_compile_options(
+   caption
+-  PRIVATE "$<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-unused-but-set-parameter;-Wno-comma;-Wno-strict-prototypes>")
++  PRIVATE "$<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-comma;-Wno-strict-prototypes>")
+ 
+ target_include_directories(
+   caption
+diff --git a/deps/libcaption/cmake/legacy.cmake b/deps/libcaption/cmake/legacy.cmake
+index eff25bb9c..7a783cd21 100644
+--- a/deps/libcaption/cmake/legacy.cmake
++++ b/deps/libcaption/cmake/legacy.cmake
+@@ -25,12 +25,6 @@ target_sources(
+ 
+ target_compile_definitions(caption PRIVATE __STDC_CONSTANT_MACROS $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>)
+ 
+-target_compile_options(
+-  caption
+-  PRIVATE
+-    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wno-unused-but-set-parameter>
+-)
+-
+ target_include_directories(
+   caption
+   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/caption
+diff --git a/plugins/CMakeLists.txt b/plugins/CMakeLists.txt
+index 90bea35be..fa0998b01 100644
+--- a/plugins/CMakeLists.txt
++++ b/plugins/CMakeLists.txt
+@@ -57,7 +57,6 @@ if(OBS_CMAKE_VERSION VERSION_GREATER_EQUAL 3.0.0)
+     add_subdirectory(mac-capture)
+     add_subdirectory(mac-syphon)
+     add_subdirectory(mac-videotoolbox)
+-    add_subdirectory(mac-virtualcam)
+   endif()
+   check_obs_browser()
+   add_subdirectory(obs-ffmpeg)
+@@ -126,7 +125,6 @@ elseif(OS_MACOS)
+   add_subdirectory(mac-capture)
+   add_subdirectory(mac-videotoolbox)
+   add_subdirectory(mac-syphon)
+-  add_subdirectory(mac-virtualcam)
+   add_subdirectory(decklink)
+   add_subdirectory(vlc-video)
+   add_subdirectory(linux-jack)
+diff --git a/plugins/obs-websocket/CMakeLists.txt b/plugins/obs-websocket/CMakeLists.txt
+index 2bc2d93..e05fc18 100644
+--- a/plugins/obs-websocket/CMakeLists.txt
++++ b/plugins/obs-websocket/CMakeLists.txt
+@@ -139,7 +139,7 @@ target_compile_options(
+     $<$<PLATFORM_ID:Darwin,Linux,FreeBSD>:-Wall>
+     $<$<COMPILE_LANG_AND_ID:CXX,GNU,AppleClang,Clang>:-Wno-error=float-conversion;-Wno-error=shadow>
+     $<$<COMPILE_LANG_AND_ID:CXX,GNU>:-Wno-error=format-overflow;-Wno-error=int-conversion;-Wno-error=comment>
+-    $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:-Wno-error=null-pointer-subtraction;-Wno-error=deprecated-declarations;-Wno-error=implicit-int-conversion;-Wno-error=shorten-64-to-32;-Wno-comma;-Wno-quoted-include-in-framework-header>
++    $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:-Wno-error;-Wno-error=deprecated-declarations;-Wno-error=implicit-int-conversion;-Wno-error=shorten-64-to-32;-Wno-comma;-Wno-quoted-include-in-framework-header>
+ )
+ 
+ target_link_libraries(
