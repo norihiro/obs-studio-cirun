@@ -30,6 +30,11 @@ runs:
           for p in ../patch/*.patch; do
             conflict=$(awk '/^Conflict:/{print $2}' $p)
             requires=$(awk '/^Requires:/{print $2}' $p)
+            os=$(awk '/^OS:/{print $2}' $p)
+            if test -n "$os" -a "$os" != "${{ runner.os }}"; then
+              echo "Info: Skipping $p because the expected OS is $os but running on ${{ runner.os }}"
+              continue
+            fi
             if test -n "$conflict" && git merge-base --is-ancestor "$conflict" HEAD; then
               echo "Info: Skipping $p because of conflicting $conflict"
               continue
