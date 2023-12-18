@@ -1,4 +1,5 @@
 Requires: cf8a8cce72
+OS: macOS
 diff --git a/.github/scripts/.Brewfile b/.github/scripts/.Brewfile
 index cdc51f13e..ac7763285 100644
 --- a/.github/scripts/.Brewfile
