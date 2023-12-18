@@ -125,6 +125,8 @@ class OBSConfigClean(OBSConfig):
     def __init__(self):
         OBSConfig.__init__(self)
         self._clean_config_dir()
+        self['General']['EnableAutoUpdates'] = 'false'
+        self.save_global()
 
 
 class OBSConfigCopyFromSaved(OBSConfig):
