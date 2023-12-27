@@ -1,3 +1,4 @@
+OS: macOS
 Requires: 8dd20dfd33
 diff --git a/cmake/macos/compilerconfig.cmake b/cmake/macos/compilerconfig.cmake
 index 4cca6bfe4..48a1e14b3 100644
