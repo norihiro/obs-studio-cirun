@@ -1,3 +1,4 @@
+Conflict: aa137f0766f6fd674c253dd88e82fee0f8f1b721
 diff --git a/deps/json11/CMakeLists.txt b/deps/json11/CMakeLists.txt
 index 78cb7c94a..2c4cb8027 100644
 --- a/deps/json11/CMakeLists.txt
