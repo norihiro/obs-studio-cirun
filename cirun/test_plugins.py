@@ -228,6 +228,23 @@ class OBSPluginTest(obstest.OBSTest):
         util.take_screenshot()
         pyautogui.hotkey('esc')
 
+    def test_vnc(self):
+        obsplugin.download_install_plugin('norihiro/obs-vnc')
+
+        self.obs.run()
+        cl = self.obs.get_obsws()
+
+        cl.send('CreateInput', {
+            'inputName': 'vnc',
+            'sceneName': 'Scene',
+            'inputKind': 'obs_vnc_source',
+            'inputSettings': {
+                'host_name': 'localhost',
+                'host_port': 5901,
+                'plain_passwd': 'password',
+            },
+        })
+
 
 if __name__ == '__main__':
     unittest.main()
