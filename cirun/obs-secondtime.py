@@ -112,20 +112,6 @@ sources = [
                     },
                 ]
             },
-        {
-            'inputName': 'images',
-            'sceneName': 'Scene Images',
-            'inputKind': 'slideshow',
-            'inputSettings': {
-                'files': [
-                    {
-                        'value': os.getcwd() + '/screenshot',
-                        'selected': False,
-                        'hidden': False,
-                        },
-                    ],
-                },
-            },
         ]
 
 background_source = sources[0]['sceneName']
