@@ -245,6 +245,26 @@ class OBSPluginTest(obstest.OBSTest):
             },
         })
 
+    def test_shutdown(self):
+        obsplugin.download_install_plugin('norihiro/obs-shutdown-plugin')
+
+        self.obs.run()
+        cl = self.obs.get_obsws()
+
+        cl.send('CallVendorRequest', {
+            'vendorName': 'obs-shutdown-plugin',
+            'requestType': 'shutdown',
+            'requestData': {
+                'reason': f'requested by {sys.argv[0]}',
+                'support_url': 'https://github.com/norihiro/obs-studio-cirun/issues',
+                'force': True,
+            },
+        })
+
+        cl.base_client.ws.close()
+        self.obs._obsws = None
+        self.assertTrue(self.obs._is_terminated(timeout=10), msg='OBS did not terminated by the plugin.')
+
 
 if __name__ == '__main__':
     unittest.main()
